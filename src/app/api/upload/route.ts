@@ -16,10 +16,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Too many uploads. Try again later.' }, { status: 429 })
   }
 
-  const { title, description } = await request.json()
+  const { fileName, description } = await request.json()
+  const normalizedTitle = typeof fileName === 'string'
+    ? fileName.replace(/\.[^/.]+$/, '').replace(/[-_]+/g, ' ').trim()
+    : ''
 
-  if (!title?.trim()) {
-    return NextResponse.json({ error: 'Title is required' }, { status: 400 })
+  if (!normalizedTitle) {
+    return NextResponse.json({ error: 'Video file name is required' }, { status: 400 })
   }
 
   // Create Mux Direct Upload
@@ -37,7 +40,7 @@ export async function POST(request: Request) {
     .from('videos')
     .insert({
       user_id: user.id,
-      title: title.trim(),
+      title: normalizedTitle,
       description: description?.trim() || null,
       mux_upload_id: upload.id,
       status: 'processing',

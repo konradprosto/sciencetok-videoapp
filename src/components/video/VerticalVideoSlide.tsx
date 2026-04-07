@@ -233,17 +233,17 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
       </div>
 
       {/* Bottom info overlay */}
-      <div className="absolute bottom-4 left-4 right-20 z-20 pointer-events-none">
+      <div className="absolute bottom-[calc(env(safe-area-inset-bottom,0px)+5.75rem)] left-4 right-20 z-20 pointer-events-none">
         <Link href={`/profile/${video.profiles?.username}`} className="pointer-events-auto">
           <p className="font-bold text-white text-base drop-shadow-lg">
             @{video.profiles?.username}
           </p>
         </Link>
-        <h3 className="mt-1 text-sm text-white font-medium drop-shadow-lg line-clamp-2">
+        <h3 className="mt-2 text-sm text-white font-medium drop-shadow-lg line-clamp-2">
           {video.title}
         </h3>
         {video.description && (
-          <p className="mt-1 text-xs text-white/70 line-clamp-1 drop-shadow-lg">
+          <p className="mt-2 text-xs text-white/70 line-clamp-2 drop-shadow-lg">
             {video.description}
           </p>
         )}

@@ -17,7 +17,7 @@ export function useVideoUpload() {
     videoId: null,
   })
 
-  const upload = useCallback(async (file: File, title: string, description: string) => {
+  const upload = useCallback(async (file: File, description: string) => {
     setState({ progress: 0, uploading: true, error: null, videoId: null })
 
     try {
@@ -25,7 +25,7 @@ export function useVideoUpload() {
       const res = await fetch('/api/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description }),
+        body: JSON.stringify({ fileName: file.name, description }),
       })
 
       if (!res.ok) {

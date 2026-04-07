@@ -8,7 +8,6 @@ import { Upload, CheckCircle, AlertCircle, Film, Loader2 } from 'lucide-react'
 
 export function VideoUploadForm() {
   const [file, setFile] = useState<File | null>(null)
-  const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -21,22 +20,20 @@ export function VideoUploadForm() {
     const dropped = e.dataTransfer.files[0]
     if (dropped?.type.startsWith('video/')) {
       setFile(dropped)
-      if (!title) setTitle(dropped.name.replace(/\.[^/.]+$/, ''))
     }
-  }, [title])
+  }, [])
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0]
     if (selected) {
       setFile(selected)
-      if (!title) setTitle(selected.name.replace(/\.[^/.]+$/, ''))
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!file || !title.trim()) return
-    const id = await upload(file, title, description)
+    if (!file) return
+    const id = await upload(file, description)
     if (id) {
       setTimeout(() => router.push(`/video/${id}`), 2000)
     }
@@ -59,7 +56,7 @@ export function VideoUploadForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto max-w-lg space-y-6">
+    <form onSubmit={handleSubmit} className="mx-auto max-w-lg space-y-6 overflow-x-hidden">
       {/* Dropzone */}
       <div
         onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
@@ -86,8 +83,8 @@ export function VideoUploadForm() {
         {file ? (
           <div className="flex flex-col items-center gap-3">
             <Film className="h-10 w-10 text-emerald-400" />
-            <div>
-              <p className="font-medium">{file.name}</p>
+            <div className="min-w-0">
+              <p className="break-all font-medium">{file.name}</p>
               <p className="text-xs text-[#8A8F98]">
                 {(file.size / (1024 * 1024)).toFixed(1)} MB
               </p>
@@ -113,20 +110,6 @@ export function VideoUploadForm() {
         )}
       </div>
 
-      {/* Title */}
-      <div className="space-y-2">
-        <label htmlFor="title" className="text-sm font-medium">Tytuł</label>
-        <input
-          id="title"
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Nadaj tytuł swojemu filmowi"
-          required
-          className="w-full rounded-xl border border-white/8 bg-[#0a0a0c] px-4 py-3 text-sm placeholder:text-[#8A8F98]/50 focus:border-[#5E6AD2] focus:outline-none focus:ring-1 focus:ring-[#5E6AD2] transition-colors"
-        />
-      </div>
-
       {/* Description */}
       <div className="space-y-2">
         <label htmlFor="desc" className="text-sm font-medium">Opis <span className="text-[#8A8F98]">(opcjonalny)</span></label>
@@ -136,7 +119,7 @@ export function VideoUploadForm() {
           onChange={(e) => setDescription(e.target.value)}
           placeholder="O czym jest ten film?"
           rows={3}
-          className="w-full rounded-xl border border-white/8 bg-[#0a0a0c] px-4 py-3 text-sm placeholder:text-[#8A8F98]/50 focus:border-[#5E6AD2] focus:outline-none focus:ring-1 focus:ring-[#5E6AD2] transition-colors resize-none"
+          className="w-full rounded-xl border border-white/8 bg-[#0a0a0c] px-4 py-3 text-base placeholder:text-[#8A8F98]/50 focus:border-[#5E6AD2] focus:outline-none focus:ring-1 focus:ring-[#5E6AD2] transition-colors resize-none md:text-sm"
         />
       </div>
 
@@ -167,7 +150,7 @@ export function VideoUploadForm() {
       {/* Submit */}
       <Button
         type="submit"
-        disabled={!file || !title.trim() || uploading}
+        disabled={!file || uploading}
         className="w-full h-11 rounded-xl bg-[#5E6AD2] text-white hover:bg-[#4F5BC0] disabled:opacity-40 transition-colors"
       >
         {uploading ? (

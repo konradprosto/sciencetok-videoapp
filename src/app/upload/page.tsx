@@ -11,7 +11,7 @@ export default async function UploadPage() {
   }
 
   return (
-    <div className="px-4 py-10 md:py-16">
+    <div className="overflow-x-hidden px-4 py-10 md:py-16">
       <div className="mx-auto max-w-lg">
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold">Dodaj nowy film</h1>

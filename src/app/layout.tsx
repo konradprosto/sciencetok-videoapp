@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -23,6 +23,12 @@ export const metadata: Metadata = {
   title: "ScienceTok",
   description: "ScienceTok - krótka forma wideo o nauce",
 };
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+}
 
 export default function RootLayout({
   children,
