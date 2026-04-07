@@ -1,6 +1,15 @@
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
 import { VideoUploadForm } from '@/components/video/VideoUploadForm'
 
-export default function UploadPage() {
+export default async function UploadPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    redirect('/login')
+  }
+
   return (
     <div className="px-4 py-10 md:py-16">
       <div className="mx-auto max-w-lg">

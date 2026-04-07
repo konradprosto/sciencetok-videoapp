@@ -3,9 +3,7 @@ import { DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 import { AuthProvider } from "@/components/auth/AuthProvider";
-import { Header } from "@/components/layout/Header";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { MobileNav } from "@/components/layout/MobileNav";
+import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
 
 const dmSans = DM_Sans({
   variable: "--font-sans",
@@ -38,12 +36,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-[#050506] text-[#EDEDEF]">
         <AuthProvider>
-          <Header />
-          <div className="flex flex-1">
-            <Sidebar />
-            <main className="flex-1 pb-16 md:pb-0">{children}</main>
-          </div>
-          <MobileNav />
+          <LayoutWrapper>{children}</LayoutWrapper>
         </AuthProvider>
       </body>
     </html>
