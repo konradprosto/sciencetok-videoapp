@@ -4,6 +4,9 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Bell, Heart, MessageCircle, CheckCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/components/auth/AuthProvider'
+import { createClient } from '@/lib/supabase/client'
+import { emitNotificationsChanged, NOTIFICATIONS_CHANGED_EVENT } from '@/lib/notifications'
 import type { Notification } from '@/types/notification'
 
 function timeAgo(date: string) {
@@ -24,11 +27,15 @@ function notificationCopy(notification: Notification) {
 }
 
 export function NotificationsPage() {
+  const { user } = useAuth()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
   const unreadCount = useMemo(() => notifications.filter((item) => !item.read_at).length, [notifications])
 
   useEffect(() => {
+    if (!user) return
+
+    const supabase = createClient()
     let cancelled = false
 
     const load = async () => {
@@ -46,10 +53,33 @@ export function NotificationsPage() {
     }
 
     load()
+
+    const handleNotificationsChanged = () => {
+      void load()
+    }
+
+    const channel = supabase
+      .channel(`notifications-page:${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+          filter: `recipient_id=eq.${user.id}`,
+        },
+        handleNotificationsChanged
+      )
+      .subscribe()
+
+    window.addEventListener(NOTIFICATIONS_CHANGED_EVENT, handleNotificationsChanged)
+
     return () => {
       cancelled = true
+      window.removeEventListener(NOTIFICATIONS_CHANGED_EVENT, handleNotificationsChanged)
+      void supabase.removeChannel(channel)
     }
-  }, [])
+  }, [user])
 
   const markAllAsRead = async () => {
     const unreadIds = notifications.filter((item) => !item.read_at).map((item) => item.id)
@@ -63,6 +93,7 @@ export function NotificationsPage() {
 
     const now = new Date().toISOString()
     setNotifications((current) => current.map((item) => ({ ...item, read_at: item.read_at || now })))
+    emitNotificationsChanged()
   }
 
   return (

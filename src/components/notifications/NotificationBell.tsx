@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { Bell } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { createClient } from '@/lib/supabase/client'
+import { NOTIFICATIONS_CHANGED_EVENT } from '@/lib/notifications'
 import { cn } from '@/lib/utils'
 
 export function NotificationBell({ className }: { className?: string }) {
@@ -13,6 +15,8 @@ export function NotificationBell({ className }: { className?: string }) {
 
   useEffect(() => {
     if (!user) return
+
+    const supabase = createClient()
 
     let cancelled = false
 
@@ -26,10 +30,32 @@ export function NotificationBell({ className }: { className?: string }) {
     }
 
     fetchUnread()
+    const handleNotificationsChanged = () => {
+      fetchUnread()
+    }
+
+    const channel = supabase
+      .channel(`notifications-bell:${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+          filter: `recipient_id=eq.${user.id}`,
+        },
+        handleNotificationsChanged
+      )
+      .subscribe()
+
+    window.addEventListener(NOTIFICATIONS_CHANGED_EVENT, handleNotificationsChanged)
     const interval = window.setInterval(fetchUnread, 30000)
+
     return () => {
       cancelled = true
+      window.removeEventListener(NOTIFICATIONS_CHANGED_EVENT, handleNotificationsChanged)
       window.clearInterval(interval)
+      void supabase.removeChannel(channel)
     }
   }, [user])
 
