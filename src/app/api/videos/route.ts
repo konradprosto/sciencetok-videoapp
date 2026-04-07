@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { attachCommentCounts } from '@/lib/videos'
 
 const hasRedis = !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
 
 async function getRedis() {
   if (!hasRedis) return null
-  const { redis } = await import('@/lib/redis')
-  return redis
+  const { createRedis } = await import('@/lib/redis')
+  return createRedis()
 }
 
 export async function GET(request: NextRequest) {
@@ -45,9 +46,10 @@ export async function GET(request: NextRequest) {
 
   const hasMore = videos.length > limit
   const items = hasMore ? videos.slice(0, limit) : videos
+  const itemsWithCommentCounts = await attachCommentCounts(supabase, items)
 
   const response = {
-    videos: items,
+    videos: itemsWithCommentCounts,
     nextCursor: hasMore ? items[items.length - 1].created_at : null,
   }
 

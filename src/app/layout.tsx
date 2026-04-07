@@ -20,8 +20,8 @@ const jetbrainsMono = JetBrains_Mono({
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: "VideoApp",
-  description: "Platforma wideo",
+  title: "ScienceTok",
+  description: "ScienceTok - krótka forma wideo o nauce",
 };
 
 export default function RootLayout({

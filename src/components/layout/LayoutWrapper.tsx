@@ -7,7 +7,7 @@ import { MobileNav } from './MobileNav'
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const isFullscreen = pathname === '/'
+  const isFullscreen = pathname === '/' || pathname.startsWith('/video/')
 
   if (isFullscreen) {
     return <>{children}</>

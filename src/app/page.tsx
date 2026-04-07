@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { VerticalFeed } from '@/components/video/VerticalFeed'
+import { attachCommentCounts } from '@/lib/videos'
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -11,5 +12,7 @@ export default async function HomePage() {
     .order('created_at', { ascending: false })
     .limit(10)
 
-  return <VerticalFeed initialVideos={videos || []} />
+  const videosWithCommentCounts = await attachCommentCounts(supabase, videos)
+
+  return <VerticalFeed initialVideos={videosWithCommentCounts} />
 }

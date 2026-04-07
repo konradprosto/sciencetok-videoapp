@@ -4,14 +4,24 @@ import { useState, useEffect } from 'react'
 import type { Comment } from '@/types/comment'
 import { CommentItem } from './CommentItem'
 import { createClient } from '@/lib/supabase/client'
+import { countComments, insertCommentIntoTree, updateCommentInTree } from '@/lib/comments'
 
 interface CommentListProps {
   videoId: string
   initialComments: Comment[]
+  onCountChange?: (count: number) => void
 }
 
-export function CommentList({ videoId, initialComments }: CommentListProps) {
+export function CommentList({ videoId, initialComments, onCountChange }: CommentListProps) {
   const [comments, setComments] = useState<Comment[]>(initialComments)
+
+  useEffect(() => {
+    setComments(initialComments)
+  }, [initialComments])
+
+  useEffect(() => {
+    onCountChange?.(countComments(comments))
+  }, [comments, onCountChange])
 
   // Realtime subscription for new comments
   useEffect(() => {
@@ -35,7 +45,19 @@ export function CommentList({ videoId, initialComments }: CommentListProps) {
             .single()
 
           if (data && !data.parent_id) {
-            setComments(prev => [data, ...prev])
+            setComments(prev => insertCommentIntoTree(prev, {
+              ...data,
+              like_count: data.like_count || 0,
+              user_has_liked: false,
+              replies: [],
+            }))
+          } else if (data) {
+            setComments(prev => insertCommentIntoTree(prev, {
+              ...data,
+              like_count: data.like_count || 0,
+              user_has_liked: false,
+              replies: [],
+            }))
           }
         }
       )
@@ -47,7 +69,15 @@ export function CommentList({ videoId, initialComments }: CommentListProps) {
   }, [videoId])
 
   const handleReply = (reply: Comment) => {
-    // For now, replies just get appended
+    setComments((prev) => insertCommentIntoTree(prev, reply))
+  }
+
+  const handleLikeChange = (commentId: string, liked: boolean, likeCount: number) => {
+    setComments((prev) => updateCommentInTree(prev, commentId, (comment) => ({
+      ...comment,
+      user_has_liked: liked,
+      like_count: likeCount,
+    })))
   }
 
   if (comments.length === 0) {
@@ -61,7 +91,12 @@ export function CommentList({ videoId, initialComments }: CommentListProps) {
   return (
     <div id="comments" className="space-y-6">
       {comments.map((comment) => (
-        <CommentItem key={comment.id} comment={comment} onReply={handleReply} />
+        <CommentItem
+          key={comment.id}
+          comment={comment}
+          onReply={handleReply}
+          onLikeChange={handleLikeChange}
+        />
       ))}
     </div>
   )

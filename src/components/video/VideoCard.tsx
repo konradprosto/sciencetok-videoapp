@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import type { Video } from '@/types/video'
 import { Eye, Heart, Clock } from 'lucide-react'
@@ -34,11 +35,12 @@ export function VideoCard({ video }: VideoCardProps) {
       {/* Thumbnail */}
       <div className="relative aspect-video overflow-hidden rounded-xl bg-[#0a0a0c] border border-white/5 group-hover:border-white/10 transition-all duration-300">
         {video.thumbnail_url ? (
-          <img
+          <Image
             src={video.thumbnail_url}
             alt={video.title}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            loading="lazy"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center">

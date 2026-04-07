@@ -2,15 +2,15 @@
 
 import { useState } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { LoginPromptModal } from '@/components/auth/LoginPromptModal'
 import { Button } from '@/components/ui/button'
 import { Send, Loader2 } from 'lucide-react'
-import Link from 'next/link'
-import { buttonVariants } from '@/components/ui/button'
+import type { Comment } from '@/types/comment'
 
 interface CommentFormProps {
   videoId: string
   parentId?: string
-  onSubmit?: (comment: any) => void
+  onSubmit?: (comment: Comment) => void
   onCancel?: () => void
   autoFocus?: boolean
 }
@@ -18,16 +18,30 @@ interface CommentFormProps {
 export function CommentForm({ videoId, parentId, onSubmit, onCancel, autoFocus }: CommentFormProps) {
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
   const { user } = useAuth()
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center rounded-xl border border-white/5 bg-[#0a0a0c] p-4">
-        <p className="text-sm text-[#8A8F98]">
-          <Link href="/login" className="text-[#5E6AD2] hover:underline">Zaloguj się</Link>
-          , aby dodać komentarz
-        </p>
-      </div>
+      <>
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-[#0a0a0c] p-4">
+          <p className="text-sm text-[#8A8F98]">Zaloguj się, aby dodać komentarz</p>
+          <Button
+            type="button"
+            size="sm"
+            className="bg-[#5E6AD2] text-white hover:bg-[#4F5BC0]"
+            onClick={() => setShowLoginPrompt(true)}
+          >
+            Zaloguj się
+          </Button>
+        </div>
+        <LoginPromptModal
+          open={showLoginPrompt}
+          onClose={() => setShowLoginPrompt(false)}
+          title="Zaloguj się, aby komentować"
+          description="Komentowanie i odpowiadanie na komentarze wymaga zalogowania."
+        />
+      </>
     )
   }
 

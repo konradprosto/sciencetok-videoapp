@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { VideoCard } from '@/components/video/VideoCard'
+import { ProfileVideoTile } from '@/components/video/ProfileVideoTile'
 import { Film, Calendar } from 'lucide-react'
 
 export default async function ProfilePage({
@@ -81,9 +81,9 @@ export default async function ProfilePage({
             Filmy
           </h2>
           {videos && videos.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-3 gap-2 md:gap-3">
               {videos.map((video) => (
-                <VideoCard key={video.id} video={video} />
+                <ProfileVideoTile key={video.id} video={video} />
               ))}
             </div>
           ) : (

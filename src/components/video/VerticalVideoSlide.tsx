@@ -2,12 +2,16 @@
 
 import { useRef, useEffect, useState, useCallback } from 'react'
 import MuxPlayer from '@mux/mux-player-react'
+import type MuxPlayerElement from '@mux/mux-player'
 import type { Video } from '@/types/video'
 import type { Comment } from '@/types/comment'
 import Link from 'next/link'
 import { Heart, MessageCircle, Share2, Plus, Play, Volume2, VolumeX, X } from 'lucide-react'
 import { CommentForm } from '@/components/comments/CommentForm'
 import { CommentItem } from '@/components/comments/CommentItem'
+import { useAuth } from '@/components/auth/AuthProvider'
+import { LoginPromptModal } from '@/components/auth/LoginPromptModal'
+import { countComments, insertCommentIntoTree, updateCommentInTree } from '@/lib/comments'
 
 interface VerticalVideoSlideProps {
   video: Video
@@ -18,13 +22,16 @@ interface VerticalVideoSlideProps {
 }
 
 export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMutedChange }: VerticalVideoSlideProps) {
-  const playerRef = useRef<any>(null)
+  const playerRef = useRef<MuxPlayerElement | null>(null)
+  const { user } = useAuth()
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(video.like_count || 0)
   const [paused, setPaused] = useState(false)
   const [showComments, setShowComments] = useState(false)
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
   const [comments, setComments] = useState<Comment[]>([])
   const [loadingComments, setLoadingComments] = useState(false)
+  const [commentCount, setCommentCount] = useState(video.comment_count || 0)
 
   // Auto play/pause based on visibility
   useEffect(() => {
@@ -47,6 +54,11 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
   }, [globalMuted, isActive])
 
   const toggleLike = async () => {
+    if (!user) {
+      setShowLoginPrompt(true)
+      return
+    }
+
     setLiked(!liked)
     setLikeCount(prev => liked ? prev - 1 : prev + 1)
     fetch('/api/likes', {
@@ -91,7 +103,9 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
       const res = await fetch(`/api/comments?videoId=${video.id}`)
       if (res.ok) {
         const data = await res.json()
-        setComments(Array.isArray(data) ? data : [])
+        const nextComments = Array.isArray(data) ? data : []
+        setComments(nextComments)
+        setCommentCount(countComments(nextComments))
       }
     } finally {
       setLoadingComments(false)
@@ -107,7 +121,21 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
   }
 
   const handleCommentSubmit = (comment: Comment) => {
-    setComments(prev => [comment, ...prev])
+    setComments(prev => insertCommentIntoTree(prev, comment))
+    setCommentCount(prev => prev + 1)
+  }
+
+  const handleReply = (comment: Comment) => {
+    setComments(prev => insertCommentIntoTree(prev, comment))
+    setCommentCount(prev => prev + 1)
+  }
+
+  const handleCommentLikeChange = (commentId: string, liked: boolean, likeCount: number) => {
+    setComments((prev) => updateCommentInTree(prev, commentId, (comment) => ({
+      ...comment,
+      user_has_liked: liked,
+      like_count: likeCount,
+    })))
   }
 
   const formatCount = (n: number) => {
@@ -185,7 +213,7 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm">
             <MessageCircle className="h-7 w-7 text-white" />
           </div>
-          <span className="text-xs font-semibold text-white drop-shadow-lg">{formatCount(video.comment_count || 0)}</span>
+          <span className="text-xs font-semibold text-white drop-shadow-lg">{formatCount(commentCount)}</span>
         </button>
 
         {/* Share */}
@@ -250,7 +278,7 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
             <Plus className="h-5 w-5 text-white" />
           </div>
         </Link>
-        <Link href="/profile/me" className="flex flex-col items-center gap-0.5 px-4 py-1">
+        <Link href={user ? '/profile/me' : '/login'} className="flex flex-col items-center gap-0.5 px-4 py-1">
           <svg className="h-6 w-6 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
           <span className="text-[10px] text-white/60 font-medium">Profil</span>
         </Link>
@@ -265,7 +293,7 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
             <h3 className="text-white font-semibold text-sm">
-              Komentarze ({video.comment_count || 0})
+              Komentarze ({commentCount})
             </h3>
             <button onClick={toggleComments} className="p-1 rounded-full hover:bg-white/10">
               <X className="h-5 w-5 text-white/70" />
@@ -282,7 +310,12 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
               <p className="text-center text-sm text-white/50 py-8">Brak komentarzy. Badz pierwszy!</p>
             ) : (
               comments.map((comment) => (
-                <CommentItem key={comment.id} comment={comment} onReply={() => {}} />
+                <CommentItem
+                  key={comment.id}
+                  comment={comment}
+                  onReply={handleReply}
+                  onLikeChange={handleCommentLikeChange}
+                />
               ))
             )}
           </div>
@@ -293,6 +326,13 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
           </div>
         </div>
       )}
+
+      <LoginPromptModal
+        open={showLoginPrompt}
+        onClose={() => setShowLoginPrompt(false)}
+        title="Zaloguj się, aby polubić film"
+        description="Polubienia i inne interakcje zapisujemy tylko dla zalogowanych użytkowników."
+      />
     </div>
   )
 }

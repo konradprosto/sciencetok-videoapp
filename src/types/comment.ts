@@ -5,6 +5,8 @@ export interface Comment {
   parent_id: string | null
   content: string
   created_at: string
+  like_count: number
+  user_has_liked: boolean
   profiles?: {
     username: string
     display_name: string | null

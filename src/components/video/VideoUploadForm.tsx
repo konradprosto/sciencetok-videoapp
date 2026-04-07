@@ -4,7 +4,7 @@ import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useVideoUpload } from '@/hooks/useVideoUpload'
 import { Button } from '@/components/ui/button'
-import { Upload, CheckCircle, AlertCircle, Film, Loader2, X } from 'lucide-react'
+import { Upload, CheckCircle, AlertCircle, Film, Loader2 } from 'lucide-react'
 
 export function VideoUploadForm() {
   const [file, setFile] = useState<File | null>(null)
@@ -13,7 +13,7 @@ export function VideoUploadForm() {
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
-  const { progress, uploading, error, videoId, upload, reset } = useVideoUpload()
+  const { progress, uploading, error, videoId, upload } = useVideoUpload()
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()

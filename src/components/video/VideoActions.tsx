@@ -1,6 +1,9 @@
 'use client'
 
 import { useLike } from '@/hooks/useLike'
+import { useState } from 'react'
+import { useAuth } from '@/components/auth/AuthProvider'
+import { LoginPromptModal } from '@/components/auth/LoginPromptModal'
 import { Heart, MessageCircle, Share2 } from 'lucide-react'
 
 interface VideoActionsProps {
@@ -11,12 +14,23 @@ interface VideoActionsProps {
 }
 
 export function VideoActions({ videoId, initialLikeCount, initialHasLiked, commentCount }: VideoActionsProps) {
+  const { user } = useAuth()
   const { liked, count, toggleLike } = useLike(videoId, initialHasLiked, initialLikeCount)
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
+
+  const handleLike = () => {
+    if (!user) {
+      setShowLoginPrompt(true)
+      return
+    }
+
+    toggleLike()
+  }
 
   const handleShare = async () => {
     const url = `${window.location.origin}/video/${videoId}`
     if (navigator.share) {
-      await navigator.share({ title: 'VideoApp', url }).catch(() => {})
+      await navigator.share({ title: 'ScienceTok', url }).catch(() => {})
     } else {
       await navigator.clipboard.writeText(url)
     }
@@ -25,7 +39,7 @@ export function VideoActions({ videoId, initialLikeCount, initialHasLiked, comme
   return (
     <div className="flex items-center gap-1">
       <button
-        onClick={toggleLike}
+        onClick={handleLike}
         className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm transition-all duration-200 ${
           liked
             ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
@@ -50,6 +64,13 @@ export function VideoActions({ videoId, initialLikeCount, initialHasLiked, comme
       >
         <Share2 className="h-4 w-4" />
       </button>
+
+      <LoginPromptModal
+        open={showLoginPrompt}
+        onClose={() => setShowLoginPrompt(false)}
+        title="Zaloguj się, aby polubić film"
+        description="Polubienia zapisujemy na Twoim koncie, więc ta akcja wymaga zalogowania."
+      />
     </div>
   )
 }

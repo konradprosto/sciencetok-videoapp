@@ -1,25 +1,49 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { Comment } from '@/types/comment'
 import { CommentForm } from './CommentForm'
-import { MessageCircle } from 'lucide-react'
+import { Heart, MessageCircle } from 'lucide-react'
+import { useAuth } from '@/components/auth/AuthProvider'
+import { LoginPromptModal } from '@/components/auth/LoginPromptModal'
 
 interface CommentItemProps {
   comment: Comment
-  onReply?: (comment: any) => void
+  onReply?: (comment: Comment) => void
+  onLikeChange?: (commentId: string, liked: boolean, likeCount: number) => void
 }
 
-export function CommentItem({ comment, onReply }: CommentItemProps) {
+export function CommentItem({ comment, onReply, onLikeChange }: CommentItemProps) {
+  const { user } = useAuth()
   const [showReply, setShowReply] = useState(false)
+  const [now] = useState(() => Date.now())
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
 
-  const timeAgo = (date: string) => {
-    const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000)
+  const timeAgo = useMemo(() => {
+    const seconds = Math.floor((now - new Date(comment.created_at).getTime()) / 1000)
     if (seconds < 60) return 'teraz'
     if (seconds < 3600) return `${Math.floor(seconds / 60)} min`
     if (seconds < 86400) return `${Math.floor(seconds / 3600)} godz.`
     if (seconds < 2592000) return `${Math.floor(seconds / 86400)} dni`
-    return new Date(date).toLocaleDateString('pl-PL')
+    return new Date(comment.created_at).toLocaleDateString('pl-PL')
+  }, [comment.created_at, now])
+
+  const handleLike = async () => {
+    if (!user) {
+      setShowLoginPrompt(true)
+      return
+    }
+
+    const res = await fetch('/api/comment-likes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ commentId: comment.id }),
+    })
+
+    if (!res.ok) return
+
+    const data = await res.json()
+    onLikeChange?.(comment.id, Boolean(data.liked), Number(data.likeCount) || 0)
   }
 
   return (
@@ -32,18 +56,30 @@ export function CommentItem({ comment, onReply }: CommentItemProps) {
           <span className="text-sm font-medium">
             {comment.profiles?.display_name || comment.profiles?.username}
           </span>
-          <span className="text-xs text-[#8A8F98]">{timeAgo(comment.created_at)}</span>
+          <span className="text-xs text-[#8A8F98]">{timeAgo}</span>
         </div>
         <p className="mt-1 text-sm text-[#EDEDEF]/80 whitespace-pre-wrap break-words">
           {comment.content}
         </p>
-        <button
-          onClick={() => setShowReply(!showReply)}
-          className="mt-1.5 flex items-center gap-1 text-xs text-[#8A8F98] hover:text-[#5E6AD2] transition-colors"
-        >
-          <MessageCircle className="h-3 w-3" />
-          Odpowiedz
-        </button>
+        <div className="mt-2 flex items-center gap-4">
+          <button
+            type="button"
+            onClick={handleLike}
+            className={`flex items-center gap-1 text-xs transition-colors ${
+              comment.user_has_liked ? 'text-rose-400' : 'text-[#8A8F98] hover:text-rose-400'
+            }`}
+          >
+            <Heart className={`h-3.5 w-3.5 ${comment.user_has_liked ? 'fill-current' : ''}`} />
+            <span>{comment.like_count || 0}</span>
+          </button>
+          <button
+            onClick={() => setShowReply(!showReply)}
+            className="flex items-center gap-1 text-xs text-[#8A8F98] hover:text-[#5E6AD2] transition-colors"
+          >
+            <MessageCircle className="h-3 w-3" />
+            Odpowiedz
+          </button>
+        </div>
         {showReply && (
           <div className="mt-3">
             <CommentForm
@@ -58,7 +94,25 @@ export function CommentItem({ comment, onReply }: CommentItemProps) {
             />
           </div>
         )}
+        {comment.replies && comment.replies.length > 0 && (
+          <div className="mt-4 space-y-4 border-l border-white/8 pl-4">
+            {comment.replies.map((reply) => (
+              <CommentItem
+                key={reply.id}
+                comment={reply}
+                onReply={onReply}
+                onLikeChange={onLikeChange}
+              />
+            ))}
+          </div>
+        )}
       </div>
+      <LoginPromptModal
+        open={showLoginPrompt}
+        onClose={() => setShowLoginPrompt(false)}
+        title="Zaloguj się, aby polubić komentarz"
+        description="Serduszka pod komentarzami są dostępne dla zalogowanych użytkowników."
+      />
     </div>
   )
 }

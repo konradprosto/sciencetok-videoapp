@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Search, Upload, User } from 'lucide-react'
+import { Home, Search, Upload, User, Bell } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/components/auth/AuthProvider'
 
@@ -13,6 +13,7 @@ export function MobileNav() {
   const items = [
     { href: '/', label: 'Główna', icon: Home },
     { href: '/search', label: 'Szukaj', icon: Search },
+    { href: user ? '/notifications' : '/login', label: 'Dzwonek', icon: Bell },
     { href: '/upload', label: 'Dodaj', icon: Upload },
     {
       href: user ? `/profile/${user.user_metadata?.username ?? user.id}` : '/login',

@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react'
+import { useRef, useCallback } from 'react'
 import { useInfiniteVideos } from '@/hooks/useInfiniteVideos'
 import { VideoCard } from './VideoCard'
-import type { Video, VideoFeedResponse } from '@/types/video'
+import type { VideoFeedResponse } from '@/types/video'
 import { Loader2 } from 'lucide-react'
 
 interface VideoFeedProps {
