@@ -1,23 +1,30 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState, useCallback } from 'react'
 import MuxPlayer from '@mux/mux-player-react'
 import type { Video } from '@/types/video'
+import type { Comment } from '@/types/comment'
 import Link from 'next/link'
-import { Heart, MessageCircle, Share2, Plus, Play, Volume2, VolumeX } from 'lucide-react'
+import { Heart, MessageCircle, Share2, Plus, Play, Volume2, VolumeX, X } from 'lucide-react'
+import { CommentForm } from '@/components/comments/CommentForm'
+import { CommentItem } from '@/components/comments/CommentItem'
 
 interface VerticalVideoSlideProps {
   video: Video
   index: number
   isActive: boolean
+  globalMuted: boolean
+  onMutedChange: (muted: boolean) => void
 }
 
-export function VerticalVideoSlide({ video, index, isActive }: VerticalVideoSlideProps) {
+export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMutedChange }: VerticalVideoSlideProps) {
   const playerRef = useRef<any>(null)
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(video.like_count || 0)
-  const [muted, setMuted] = useState(false)
   const [paused, setPaused] = useState(false)
+  const [showComments, setShowComments] = useState(false)
+  const [comments, setComments] = useState<Comment[]>([])
+  const [loadingComments, setLoadingComments] = useState(false)
 
   // Auto play/pause based on visibility
   useEffect(() => {
@@ -25,11 +32,19 @@ export function VerticalVideoSlide({ video, index, isActive }: VerticalVideoSlid
     if (!player) return
 
     if (isActive) {
+      player.muted = globalMuted
       player.play?.().catch(() => {})
     } else {
       player.pause?.()
     }
-  }, [isActive])
+  }, [isActive, globalMuted])
+
+  // Sync muted state to player when globalMuted changes
+  useEffect(() => {
+    const player = playerRef.current
+    if (!player || !isActive) return
+    player.muted = globalMuted
+  }, [globalMuted, isActive])
 
   const toggleLike = async () => {
     setLiked(!liked)
@@ -65,6 +80,36 @@ export function VerticalVideoSlide({ video, index, isActive }: VerticalVideoSlid
     }
   }
 
+  const toggleMuted = () => {
+    onMutedChange(!globalMuted)
+  }
+
+  const loadComments = useCallback(async () => {
+    if (loadingComments) return
+    setLoadingComments(true)
+    try {
+      const res = await fetch(`/api/comments?videoId=${video.id}`)
+      if (res.ok) {
+        const data = await res.json()
+        setComments(Array.isArray(data) ? data : [])
+      }
+    } finally {
+      setLoadingComments(false)
+    }
+  }, [video.id, loadingComments])
+
+  const toggleComments = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!showComments) {
+      loadComments()
+    }
+    setShowComments(!showComments)
+  }
+
+  const handleCommentSubmit = (comment: Comment) => {
+    setComments(prev => [comment, ...prev])
+  }
+
   const formatCount = (n: number) => {
     if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`
     if (n >= 1000) return `${(n / 1000).toFixed(1)}k`
@@ -77,14 +122,14 @@ export function VerticalVideoSlide({ video, index, isActive }: VerticalVideoSlid
       className="relative h-dvh w-full snap-start snap-always flex items-center justify-center bg-black"
       onClick={togglePlayPause}
     >
-      {/* Video Player - full bleed */}
+      {/* Video Player */}
       {video.mux_playback_id ? (
         <MuxPlayer
           ref={playerRef}
           playbackId={video.mux_playback_id}
           streamType="on-demand"
           autoPlay={isActive ? 'muted' : false}
-          muted={muted}
+          muted={globalMuted}
           loop
           playsInline
           style={{
@@ -92,7 +137,7 @@ export function VerticalVideoSlide({ video, index, isActive }: VerticalVideoSlid
             height: '100%',
             position: 'absolute',
             inset: 0,
-            ['--media-object-fit' as string]: 'cover',
+            ['--media-object-fit' as string]: 'contain',
             ['--controls' as string]: 'none',
           } as Record<string, string>}
           className="absolute inset-0"
@@ -115,7 +160,7 @@ export function VerticalVideoSlide({ video, index, isActive }: VerticalVideoSlid
       {/* Gradient overlays */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60 pointer-events-none z-10" />
 
-      {/* Right side action bar - TikTok style */}
+      {/* Right side action bar */}
       <div className="absolute right-3 bottom-32 flex flex-col items-center gap-5 z-20" onClick={(e) => e.stopPropagation()}>
         {/* Avatar */}
         <Link href={`/profile/${video.profiles?.username}`} className="relative mb-2">
@@ -135,13 +180,13 @@ export function VerticalVideoSlide({ video, index, isActive }: VerticalVideoSlid
           <span className="text-xs font-semibold text-white drop-shadow-lg">{formatCount(likeCount)}</span>
         </button>
 
-        {/* Comment */}
-        <Link href={`/video/${video.id}`} className="flex flex-col items-center gap-1">
+        {/* Comment - opens inline panel instead of navigating */}
+        <button onClick={toggleComments} className="flex flex-col items-center gap-1">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm">
             <MessageCircle className="h-7 w-7 text-white" />
           </div>
           <span className="text-xs font-semibold text-white drop-shadow-lg">{formatCount(video.comment_count || 0)}</span>
-        </Link>
+        </button>
 
         {/* Share */}
         <button onClick={handleShare} className="flex flex-col items-center gap-1">
@@ -152,9 +197,9 @@ export function VerticalVideoSlide({ video, index, isActive }: VerticalVideoSlid
         </button>
 
         {/* Mute toggle */}
-        <button onClick={() => setMuted(!muted)} className="flex flex-col items-center gap-1">
+        <button onClick={toggleMuted} className="flex flex-col items-center gap-1">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm">
-            {muted ? <VolumeX className="h-5 w-5 text-white" /> : <Volume2 className="h-5 w-5 text-white" />}
+            {globalMuted ? <VolumeX className="h-5 w-5 text-white" /> : <Volume2 className="h-5 w-5 text-white" />}
           </div>
         </button>
       </div>
@@ -190,7 +235,7 @@ export function VerticalVideoSlide({ video, index, isActive }: VerticalVideoSlid
         </div>
       </div>
 
-      {/* Bottom navigation - mini version */}
+      {/* Bottom navigation */}
       <div className="absolute bottom-0 left-0 right-0 z-30 flex items-center justify-around py-2 pb-[env(safe-area-inset-bottom,8px)] bg-gradient-to-t from-black/80 to-transparent" onClick={(e) => e.stopPropagation()}>
         <Link href="/" className="flex flex-col items-center gap-0.5 px-4 py-1">
           <svg className="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
@@ -210,6 +255,44 @@ export function VerticalVideoSlide({ video, index, isActive }: VerticalVideoSlid
           <span className="text-[10px] text-white/60 font-medium">Profil</span>
         </Link>
       </div>
+
+      {/* Comments panel - slides up from bottom, video keeps playing */}
+      {showComments && (
+        <div
+          className="absolute inset-x-0 bottom-0 z-40 flex flex-col bg-[#0a0a0c]/95 backdrop-blur-lg rounded-t-2xl max-h-[60vh] animate-slide-up"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
+            <h3 className="text-white font-semibold text-sm">
+              Komentarze ({video.comment_count || 0})
+            </h3>
+            <button onClick={toggleComments} className="p-1 rounded-full hover:bg-white/10">
+              <X className="h-5 w-5 text-white/70" />
+            </button>
+          </div>
+
+          {/* Comments list */}
+          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
+            {loadingComments ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-white/80" />
+              </div>
+            ) : comments.length === 0 ? (
+              <p className="text-center text-sm text-white/50 py-8">Brak komentarzy. Badz pierwszy!</p>
+            ) : (
+              comments.map((comment) => (
+                <CommentItem key={comment.id} comment={comment} onReply={() => {}} />
+              ))
+            )}
+          </div>
+
+          {/* Comment form */}
+          <div className="shrink-0 border-t border-white/10 px-4 py-3 pb-[env(safe-area-inset-bottom,12px)]">
+            <CommentForm videoId={video.id} onSubmit={handleCommentSubmit} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

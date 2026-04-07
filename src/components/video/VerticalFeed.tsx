@@ -11,7 +11,8 @@ interface VerticalFeedProps {
 export function VerticalFeed({ initialVideos }: VerticalFeedProps) {
   const [videos, setVideos] = useState<Video[]>(initialVideos)
   const [activeIndex, setActiveIndex] = useState(0)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const [globalMuted, setGlobalMuted] = useState(true)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   // Load more videos
   const loadMore = useCallback(async () => {
@@ -26,7 +27,7 @@ export function VerticalFeed({ initialVideos }: VerticalFeedProps) {
 
   // Detect active video via IntersectionObserver
   useEffect(() => {
-    const container = containerRef.current
+    const container = scrollRef.current
     if (!container) return
 
     const observer = new IntersectionObserver(
@@ -64,19 +65,22 @@ export function VerticalFeed({ initialVideos }: VerticalFeedProps) {
   }
 
   return (
-    <div
-      ref={containerRef}
-      className="fixed inset-0 z-50 snap-y snap-mandatory overflow-y-auto bg-black"
-      style={{ scrollBehavior: 'smooth' }}
-    >
-      {videos.map((video, index) => (
-        <VerticalVideoSlide
-          key={video.id}
-          video={video}
-          index={index}
-          isActive={index === activeIndex}
-        />
-      ))}
+    <div className="fixed inset-0 z-50 flex justify-center bg-black">
+      <div
+        ref={scrollRef}
+        className="h-full w-full md:max-w-[480px] snap-y snap-mandatory overflow-y-auto"
+      >
+        {videos.map((video, index) => (
+          <VerticalVideoSlide
+            key={video.id}
+            video={video}
+            index={index}
+            isActive={index === activeIndex}
+            globalMuted={globalMuted}
+            onMutedChange={setGlobalMuted}
+          />
+        ))}
+      </div>
     </div>
   )
 }
