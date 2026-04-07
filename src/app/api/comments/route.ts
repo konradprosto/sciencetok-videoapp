@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { commentRatelimit } from '@/lib/ratelimit'
 import { fetchCommentsTree } from '@/lib/comments'
 
@@ -19,6 +20,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: Request) {
   const supabase = await createClient()
+  const admin = createAdminClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
   if (authError || !user) {
@@ -67,17 +69,19 @@ export async function POST(request: Request) {
   }
 
   if (parentCommentUserId && parentCommentUserId !== user.id) {
-    await supabase
+    const { error: notificationError } = await admin
       .from('notifications')
-      .upsert({
+      .insert({
         recipient_id: parentCommentUserId,
         actor_id: user.id,
         type: 'comment_reply',
         comment_id: data.id,
         video_id: videoId,
-      }, {
-        onConflict: 'actor_id,type,comment_id',
       })
+
+    if (notificationError) {
+      console.error('Failed to create reply notification:', notificationError)
+    }
   }
 
   return NextResponse.json({

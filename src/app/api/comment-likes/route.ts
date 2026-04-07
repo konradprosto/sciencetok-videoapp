@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
+  const admin = createAdminClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
   if (authError || !user) {
@@ -49,7 +51,7 @@ export async function POST(request: Request) {
     .insert({ user_id: user.id, comment_id: commentId })
 
   if (comment.user_id !== user.id) {
-    await supabase
+    const { error: notificationError } = await admin
       .from('notifications')
       .upsert({
         recipient_id: comment.user_id,
@@ -59,7 +61,12 @@ export async function POST(request: Request) {
         video_id: comment.video_id,
       }, {
         onConflict: 'actor_id,type,comment_id',
+        ignoreDuplicates: true,
       })
+
+    if (notificationError) {
+      console.error('Failed to create comment like notification:', notificationError)
+    }
   }
 
   return NextResponse.json({
