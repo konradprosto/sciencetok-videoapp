@@ -3,13 +3,15 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
+import { isAdminEmail } from '@/lib/admin'
 
 interface AuthContext {
   user: User | null
   loading: boolean
+  isAdmin: boolean
 }
 
-const AuthContext = createContext<AuthContext>({ user: null, loading: true })
+const AuthContext = createContext<AuthContext>({ user: null, loading: true, isAdmin: false })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
@@ -26,7 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase])
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin: isAdminEmail(user?.email) }}>
       {children}
     </AuthContext.Provider>
   )

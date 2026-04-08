@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { VideoUploadForm } from '@/components/video/VideoUploadForm'
+import { isAdminEmail } from '@/lib/admin'
 
 export default async function UploadPage() {
   const supabase = await createClient()
@@ -8,6 +9,10 @@ export default async function UploadPage() {
 
   if (!user) {
     redirect('/login')
+  }
+
+  if (!isAdminEmail(user.email)) {
+    redirect('/')
   }
 
   return (

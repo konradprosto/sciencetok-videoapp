@@ -6,7 +6,7 @@ import type MuxPlayerElement from '@mux/mux-player'
 import type { Video } from '@/types/video'
 import type { Comment } from '@/types/comment'
 import Link from 'next/link'
-import { Heart, MessageCircle, Share2, Plus, Play, Volume2, VolumeX, X } from 'lucide-react'
+import { Heart, MessageCircle, Share2, Play, Volume2, VolumeX, X, Bell, Home, Search, Upload, User as UserIcon } from 'lucide-react'
 import { CommentForm } from '@/components/comments/CommentForm'
 import { CommentItem } from '@/components/comments/CommentItem'
 import { useAuth } from '@/components/auth/AuthProvider'
@@ -23,7 +23,7 @@ interface VerticalVideoSlideProps {
 
 export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMutedChange }: VerticalVideoSlideProps) {
   const playerRef = useRef<MuxPlayerElement | null>(null)
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(video.like_count || 0)
   const [paused, setPaused] = useState(false)
@@ -156,7 +156,7 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
           ref={playerRef}
           playbackId={video.mux_playback_id}
           streamType="on-demand"
-          autoPlay={isActive ? 'muted' : false}
+          autoPlay={isActive}
           muted={globalMuted}
           loop
           playsInline
@@ -191,12 +191,9 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
       {/* Right side action bar */}
       <div className="absolute right-3 bottom-32 flex flex-col items-center gap-5 z-20" onClick={(e) => e.stopPropagation()}>
         {/* Avatar */}
-        <Link href={`/profile/${video.profiles?.username}`} className="relative mb-2">
+        <Link href={`/profile/${video.profiles?.username}`} className="mb-2">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#5E6AD2] text-white text-lg font-bold ring-2 ring-white shadow-lg">
             {video.profiles?.display_name?.[0]?.toUpperCase() || video.profiles?.username?.[0]?.toUpperCase() || '?'}
-          </div>
-          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 flex h-5 w-5 items-center justify-center rounded-full bg-[#5E6AD2]">
-            <Plus className="h-3 w-3 text-white" />
           </div>
         </Link>
 
@@ -266,20 +263,25 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
       {/* Bottom navigation */}
       <div className="absolute bottom-0 left-0 right-0 z-30 flex items-center justify-around py-2 pb-[env(safe-area-inset-bottom,8px)] bg-gradient-to-t from-black/80 to-transparent" onClick={(e) => e.stopPropagation()}>
         <Link href="/" className="flex flex-col items-center gap-0.5 px-4 py-1">
-          <svg className="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          <Home className="h-6 w-6 text-white" />
           <span className="text-[10px] text-white font-medium">Glowna</span>
         </Link>
         <Link href="/search" className="flex flex-col items-center gap-0.5 px-4 py-1">
-          <svg className="h-6 w-6 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <Search className="h-6 w-6 text-white/60" />
           <span className="text-[10px] text-white/60 font-medium">Szukaj</span>
         </Link>
-        <Link href="/upload" className="flex flex-col items-center gap-0.5 px-4 py-1">
-          <div className="flex h-8 w-12 items-center justify-center rounded-lg bg-[#5E6AD2]">
-            <Plus className="h-5 w-5 text-white" />
-          </div>
+        <Link href={user ? '/notifications' : '/login'} className="flex flex-col items-center gap-0.5 px-4 py-1">
+          <Bell className="h-6 w-6 text-white/60" />
+          <span className="text-[10px] text-white/60 font-medium">Powiad.</span>
         </Link>
+        {isAdmin && (
+          <Link href="/upload" className="flex flex-col items-center gap-0.5 px-4 py-1">
+            <Upload className="h-6 w-6 text-white/60" />
+            <span className="text-[10px] text-white/60 font-medium">Dodaj</span>
+          </Link>
+        )}
         <Link href={user ? '/profile/me' : '/login'} className="flex flex-col items-center gap-0.5 px-4 py-1">
-          <svg className="h-6 w-6 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          <UserIcon className="h-6 w-6 text-white/60" />
           <span className="text-[10px] text-white/60 font-medium">Profil</span>
         </Link>
       </div>

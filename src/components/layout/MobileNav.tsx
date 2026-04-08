@@ -8,13 +8,13 @@ import { useAuth } from '@/components/auth/AuthProvider'
 
 export function MobileNav() {
   const pathname = usePathname()
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
 
   const items = [
     { href: '/', label: 'Główna', icon: Home },
     { href: '/search', label: 'Szukaj', icon: Search },
-    { href: user ? '/notifications' : '/login', label: 'Dzwonek', icon: Bell },
-    { href: '/upload', label: 'Dodaj', icon: Upload },
+    { href: user ? '/notifications' : '/login', label: 'Powiad.', icon: Bell },
+    ...(isAdmin ? [{ href: '/upload', label: 'Dodaj', icon: Upload }] : []),
     {
       href: user ? `/profile/${user.user_metadata?.username ?? user.id}` : '/login',
       label: 'Profil',

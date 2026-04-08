@@ -1,10 +1,15 @@
+'use client'
+
 import Link from 'next/link'
 import { Upload, Search } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { UserMenu } from '@/components/auth/UserMenu'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
+import { useAuth } from '@/components/auth/AuthProvider'
 
 export function Header() {
+  const { isAdmin } = useAuth()
+
   return (
     <header className="sticky top-0 z-40 border-b border-white/8 bg-[#050506]/95 backdrop-blur supports-[backdrop-filter]:bg-[#050506]/80 shadow-[0_1px_12px_rgba(94,106,210,0.08)]">
       <div className="flex h-14 items-center justify-between px-4 md:px-6">
@@ -16,9 +21,11 @@ export function Header() {
             <Search className="h-5 w-5" />
           </Link>
           <NotificationBell className="hidden sm:inline-flex" />
-          <Link href="/upload" className={buttonVariants({ variant: 'ghost', size: 'icon' })}>
-            <Upload className="h-5 w-5" />
-          </Link>
+          {isAdmin && (
+            <Link href="/upload" className={buttonVariants({ variant: 'ghost', size: 'icon' })}>
+              <Upload className="h-5 w-5" />
+            </Link>
+          )}
           <UserMenu />
         </div>
       </div>

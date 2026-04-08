@@ -11,7 +11,7 @@ interface VerticalFeedProps {
 export function VerticalFeed({ initialVideos }: VerticalFeedProps) {
   const [videos, setVideos] = useState<Video[]>(initialVideos)
   const [activeIndex, setActiveIndex] = useState(0)
-  const [globalMuted, setGlobalMuted] = useState(true)
+  const [globalMuted, setGlobalMuted] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   // Load more videos

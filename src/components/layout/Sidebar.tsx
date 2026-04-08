@@ -6,16 +6,15 @@ import { Home, Compass, Upload, User, Bell } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/components/auth/AuthProvider'
 
-const navItems = [
-  { href: '/', label: 'Główna', icon: Home },
-  { href: '/search', label: 'Szukaj', icon: Compass },
-  { href: '/notifications', label: 'Powiadomienia', icon: Bell },
-  { href: '/upload', label: 'Dodaj', icon: Upload },
-]
-
 export function Sidebar() {
   const pathname = usePathname()
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
+  const navItems = [
+    { href: '/', label: 'Główna', icon: Home },
+    { href: '/search', label: 'Szukaj', icon: Compass },
+    { href: '/notifications', label: 'Powiadomienia', icon: Bell },
+    ...(isAdmin ? [{ href: '/upload', label: 'Dodaj', icon: Upload }] : []),
+  ]
 
   return (
     <aside className="hidden md:flex w-56 shrink-0 flex-col border-r border-white/8 bg-[#050506] p-4 gap-1">
