@@ -165,8 +165,8 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
     >
       <div
         className={cn(
-          'relative h-full w-full overflow-hidden bg-black transition-[transform,border-radius,box-shadow,filter] duration-300 ease-out',
-          showComments && 'origin-top scale-[0.92] -translate-y-[18%] rounded-[28px] shadow-[0_30px_120px_rgba(0,0,0,0.55)]'
+          'relative h-full w-full overflow-hidden bg-black transition-[transform,border-radius,box-shadow] duration-300 ease-out',
+          showComments && 'origin-top scale-[0.84] -translate-y-[26%] rounded-[28px] shadow-[0_24px_80px_rgba(0,0,0,0.45)]'
         )}
       >
         {/* Video Player */}
@@ -345,7 +345,7 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
       {/* Comments panel - anchored bottom sheet with video preserved above */}
       <div
         className={cn(
-          'absolute inset-x-0 bottom-0 z-40 flex h-[62dvh] max-h-[62dvh] flex-col rounded-t-[28px] border-t border-white/10 bg-[#0a0a0c]/96 backdrop-blur-xl transition-transform duration-300 ease-out',
+          'absolute inset-x-0 bottom-0 z-40 flex h-[54dvh] min-h-[24rem] max-h-[54dvh] flex-col rounded-t-[28px] border-t border-white/10 bg-[#0a0a0c]/96 backdrop-blur-xl transition-transform duration-300 ease-out sm:h-[56dvh] sm:max-h-[56dvh]',
           showComments ? 'translate-y-0' : 'translate-y-full pointer-events-none'
         )}
         onClick={(e) => e.stopPropagation()}
