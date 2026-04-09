@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { usePathname } from 'next/navigation'
 import { AlertCircle, Bug, ImagePlus, Loader2, Send, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -43,7 +44,10 @@ export function BugReportModal({ open, onClose }: BugReportModalProps) {
     }
   }, [screenshotPreviewUrl])
 
-  if (!open) return null
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
+  if (!open || !mounted) return null
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -98,7 +102,7 @@ export function BugReportModal({ open, onClose }: BugReportModalProps) {
     setScreenshot(file)
   }
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[110] flex items-end justify-center bg-black/70 p-4 backdrop-blur-sm md:items-center"
       onClick={onClose}
@@ -235,6 +239,7 @@ export function BugReportModal({ open, onClose }: BugReportModalProps) {
           </form>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
