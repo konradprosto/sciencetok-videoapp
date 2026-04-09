@@ -11,6 +11,7 @@ import { CommentForm } from '@/components/comments/CommentForm'
 import { CommentItem } from '@/components/comments/CommentItem'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { LoginPromptModal } from '@/components/auth/LoginPromptModal'
+import { useUnreadNotifications } from '@/hooks/useUnreadNotifications'
 import { countComments, insertCommentIntoTree, updateCommentInTree } from '@/lib/comments'
 import { cn } from '@/lib/utils'
 import { CommentSkeleton } from '@/components/ui/skeleton'
@@ -26,6 +27,7 @@ interface VerticalVideoSlideProps {
 export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMutedChange }: VerticalVideoSlideProps) {
   const playerRef = useRef<MuxPlayerElement | null>(null)
   const { user, isAdmin } = useAuth()
+  const unreadNotifications = useUnreadNotifications(user?.id)
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(video.like_count || 0)
   const [paused, setPaused] = useState(false)
@@ -386,7 +388,14 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
             <span className="text-[10px] text-white/60 font-medium">Szukaj</span>
           </Link>
           <Link href={user ? '/notifications' : '/login'} className="flex flex-col items-center gap-0.5 px-4 py-1">
-            <Bell className="h-6 w-6 text-white/60" />
+            <span className="relative">
+              <Bell className="h-6 w-6 text-white/60" />
+              {user && unreadNotifications > 0 && (
+                <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-white">
+                  {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                </span>
+              )}
+            </span>
             <span className="text-[10px] text-white/60 font-medium">Powiad.</span>
           </Link>
           {isAdmin && (

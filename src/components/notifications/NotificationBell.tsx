@@ -1,63 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Bell } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { createClient } from '@/lib/supabase/client'
-import { NOTIFICATIONS_CHANGED_EVENT } from '@/lib/notifications'
+import { useUnreadNotifications } from '@/hooks/useUnreadNotifications'
 import { cn } from '@/lib/utils'
 
 export function NotificationBell({ className }: { className?: string }) {
   const { user } = useAuth()
-  const [unreadCount, setUnreadCount] = useState(0)
-
-  useEffect(() => {
-    if (!user) return
-
-    const supabase = createClient()
-
-    let cancelled = false
-
-    const fetchUnread = async () => {
-      const res = await fetch('/api/notifications?unreadOnly=true&limit=50')
-      if (!res.ok || cancelled) return
-      const data = await res.json()
-      if (!cancelled) {
-        setUnreadCount(Array.isArray(data) ? data.length : 0)
-      }
-    }
-
-    fetchUnread()
-    const handleNotificationsChanged = () => {
-      fetchUnread()
-    }
-
-    const channel = supabase
-      .channel(`notifications-bell:${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'notifications',
-          filter: `recipient_id=eq.${user.id}`,
-        },
-        handleNotificationsChanged
-      )
-      .subscribe()
-
-    window.addEventListener(NOTIFICATIONS_CHANGED_EVENT, handleNotificationsChanged)
-    const interval = window.setInterval(fetchUnread, 30000)
-
-    return () => {
-      cancelled = true
-      window.removeEventListener(NOTIFICATIONS_CHANGED_EVENT, handleNotificationsChanged)
-      window.clearInterval(interval)
-      void supabase.removeChannel(channel)
-    }
-  }, [user])
+  const unreadCount = useUnreadNotifications(user?.id)
 
   return (
     <Link

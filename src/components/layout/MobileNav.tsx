@@ -5,10 +5,12 @@ import { usePathname } from 'next/navigation'
 import { Home, Search, Upload, User, Bell } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { useUnreadNotifications } from '@/hooks/useUnreadNotifications'
 
 export function MobileNav() {
   const pathname = usePathname()
   const { user, isAdmin } = useAuth()
+  const unreadCount = useUnreadNotifications(user?.id)
 
   const items = [
     { href: '/', label: 'Główna', icon: Home },
@@ -38,7 +40,14 @@ export function MobileNav() {
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
-            <item.icon className="h-5 w-5" />
+            <span className="relative">
+              <item.icon className="h-5 w-5" />
+              {item.label === 'Powiad.' && user && unreadCount > 0 && (
+                <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-white">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </span>
             {item.label}
           </Link>
         ))}
