@@ -39,6 +39,14 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-light: var(--primary-light);
+  --color-subtle: var(--text-tertiary);
+  --z-index-header: 40;
+  --z-index-feed: 50;
+  --z-index-dropdown: 60;
+  --z-index-modal-backdrop: 100;
+  --z-index-modal: 110;
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -58,21 +66,24 @@
   --popover-foreground: #EDEDEF;
   --primary: #5E6AD2;
   --primary-foreground: #FFFFFF;
+  --primary-hover: #4F5BC0;
+  --primary-light: #C7CCFF;
   --secondary: #161618;
   --secondary-foreground: #EDEDEF;
   --muted: #161618;
-  --muted-foreground: #8A8F98;
+  --muted-foreground: #9DA2AB;
   --accent: #1a1a1e;
   --accent-foreground: #EDEDEF;
   --destructive: #E5484D;
   --border: rgba(255, 255, 255, 0.08);
   --input: rgba(255, 255, 255, 0.08);
   --ring: #5E6AD2;
+  --text-tertiary: #C8CDD5;
   --chart-1: #5E6AD2;
   --chart-2: #E5484D;
   --chart-3: #30A46C;
   --chart-4: #F5A623;
-  --chart-5: #8A8F98;
+  --chart-5: #9DA2AB;
   --radius: 0.75rem;
   --sidebar: #050506;
   --sidebar-foreground: #EDEDEF;
@@ -82,6 +93,17 @@
   --sidebar-accent-foreground: #EDEDEF;
   --sidebar-border: rgba(255, 255, 255, 0.08);
   --sidebar-ring: #5E6AD2;
+
+  /* Z-index scale */
+  --z-base: 0;
+  --z-overlay: 10;
+  --z-sticky: 20;
+  --z-video-ui: 30;
+  --z-header: 40;
+  --z-feed: 50;
+  --z-dropdown: 60;
+  --z-modal-backdrop: 100;
+  --z-modal: 110;
 }
 
 @layer base {
@@ -113,6 +135,47 @@
   }
 }
 
+@keyframes slide-down {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
 .animate-slide-up {
   animation: slide-up 0.3s ease-out;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.2s ease-in forwards;
+}
+
+/* Reduced motion: disable animations for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-up,
+  .animate-slide-down {
+    animation: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Press feedback for interactive elements */
+.press-feedback {
+  transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+}
+.press-feedback:active {
+  transform: scale(0.97);
+  opacity: 0.85;
 }

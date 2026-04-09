@@ -13,6 +13,7 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { LoginPromptModal } from '@/components/auth/LoginPromptModal'
 import { countComments, insertCommentIntoTree, updateCommentInTree } from '@/lib/comments'
 import { cn } from '@/lib/utils'
+import { CommentSkeleton } from '@/components/ui/skeleton'
 
 interface VerticalVideoSlideProps {
   video: Video
@@ -34,6 +35,12 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
   const [loadingComments, setLoadingComments] = useState(false)
   const [commentCount, setCommentCount] = useState(video.comment_count || 0)
   const [replyTarget, setReplyTarget] = useState<Comment | null>(null)
+  const [visibleCount, setVisibleCount] = useState(20)
+  const [closingComments, setClosingComments] = useState(false)
+  const [sheetDragY, setSheetDragY] = useState(0)
+  const dragStartY = useRef(0)
+  const isDragging = useRef(false)
+  const commentsSheetRef = useRef<HTMLDivElement>(null)
 
   // Auto play/pause based on visibility
   useEffect(() => {
@@ -115,9 +122,75 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
   }, [video.id, loadingComments])
 
   const closeComments = useCallback(() => {
-    setShowComments(false)
-    setReplyTarget(null)
+    setClosingComments(true)
+    setTimeout(() => {
+      setShowComments(false)
+      setClosingComments(false)
+      setReplyTarget(null)
+      setVisibleCount(20)
+    }, 200) // matches slide-down animation duration
   }, [])
+
+  // Escape key closes comments
+  useEffect(() => {
+    if (!showComments) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeComments()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [showComments, closeComments])
+
+  // Focus trap: keep focus within comments sheet
+  useEffect(() => {
+    if (!showComments || closingComments) return
+    const sheet = commentsSheetRef.current
+    if (!sheet) return
+
+    const focusableSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const focusable = sheet.querySelectorAll<HTMLElement>(focusableSelector)
+      if (focusable.length === 0) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+    document.addEventListener('keydown', handleTab)
+    return () => document.removeEventListener('keydown', handleTab)
+  }, [showComments, closingComments])
+
+  // Swipe-to-dismiss handlers
+  const handleDragStart = useCallback((e: React.TouchEvent) => {
+    dragStartY.current = e.touches[0].clientY
+    isDragging.current = true
+    setSheetDragY(0)
+  }, [])
+
+  const handleDragMove = useCallback((e: React.TouchEvent) => {
+    if (!isDragging.current) return
+    const delta = e.touches[0].clientY - dragStartY.current
+    // Only allow dragging down (positive delta)
+    if (delta > 0) {
+      setSheetDragY(delta)
+    }
+  }, [])
+
+  const handleDragEnd = useCallback(() => {
+    if (!isDragging.current) return
+    isDragging.current = false
+    // If dragged more than 100px down, close the sheet
+    if (sheetDragY > 100) {
+      closeComments()
+    }
+    setSheetDragY(0)
+  }, [sheetDragY, closeComments])
 
   const toggleComments = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -217,13 +290,13 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
         >
           {/* Avatar */}
           <Link href={`/profile/${video.profiles?.username}`} className="mb-2">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#5E6AD2] text-white text-lg font-bold ring-2 ring-white shadow-lg">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white text-lg font-bold ring-2 ring-white shadow-lg">
               {video.profiles?.display_name?.[0]?.toUpperCase() || video.profiles?.username?.[0]?.toUpperCase() || '?'}
             </div>
           </Link>
 
           {/* Like */}
-          <button onClick={toggleLike} className="flex flex-col items-center gap-1">
+          <button onClick={toggleLike} aria-label={liked ? 'Cofnij polubienie' : 'Polub film'} className="flex flex-col items-center gap-1 press-feedback">
             <div className={`flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 ${liked ? 'bg-red-500/20' : 'bg-white/10 backdrop-blur-sm'}`}>
               <Heart className={`h-7 w-7 transition-all duration-200 ${liked ? 'text-red-500 fill-red-500 scale-110' : 'text-white'}`} />
             </div>
@@ -231,7 +304,7 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
           </button>
 
           {/* Comment - opens inline panel instead of navigating */}
-          <button onClick={toggleComments} className="flex flex-col items-center gap-1">
+          <button onClick={toggleComments} aria-label={`Komentarze: ${commentCount}`} className="flex flex-col items-center gap-1 press-feedback">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm">
               <MessageCircle className="h-7 w-7 text-white" />
             </div>
@@ -239,7 +312,7 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
           </button>
 
           {/* Share */}
-          <button onClick={handleShare} className="flex flex-col items-center gap-1">
+          <button onClick={handleShare} aria-label="Udostępnij film" className="flex flex-col items-center gap-1 press-feedback">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm">
               <Share2 className="h-6 w-6 text-white" />
             </div>
@@ -247,8 +320,8 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
           </button>
 
           {/* Mute toggle */}
-          <button onClick={toggleMuted} className="flex flex-col items-center gap-1">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm">
+          <button onClick={toggleMuted} aria-label={globalMuted ? 'Włącz dźwięk' : 'Wycisz'} className="flex flex-col items-center gap-1 press-feedback">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm">
               {globalMuted ? <VolumeX className="h-5 w-5 text-white" /> : <Volume2 className="h-5 w-5 text-white" />}
             </div>
           </button>
@@ -288,7 +361,7 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
             ScienceTok
           </Link>
           <div className="flex items-center gap-3">
-            <Link href="/search" className="p-2">
+            <Link href="/search" className="p-2" aria-label="Szukaj">
               <svg className="h-6 w-6 text-white drop-shadow-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -343,10 +416,23 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
 
           {/* Comments panel - anchored bottom sheet with video preserved above */}
           <div
-            className="absolute inset-x-0 bottom-0 z-40 flex h-[54dvh] min-h-[24rem] max-h-[54dvh] flex-col rounded-t-[28px] border-t border-white/10 bg-[#0a0a0c]/96 backdrop-blur-xl animate-slide-up sm:h-[56dvh] sm:max-h-[56dvh]"
+            ref={commentsSheetRef}
+            role="dialog"
+            aria-label="Komentarze"
+            className={cn(
+              'absolute inset-x-0 bottom-0 z-40 flex h-[54dvh] min-h-[24rem] max-h-[54dvh] flex-col rounded-t-[28px] border-t border-white/10 bg-card/96 backdrop-blur-xl sm:h-[56dvh] sm:max-h-[56dvh]',
+              closingComments ? 'animate-slide-down' : 'animate-slide-up'
+            )}
+            style={sheetDragY > 0 ? { transform: `translateY(${sheetDragY}px)`, transition: 'none' } : undefined}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="shrink-0 px-4 pt-2">
+            {/* Drag handle */}
+            <div
+              className="shrink-0 px-4 pt-2 cursor-grab active:cursor-grabbing touch-none"
+              onTouchStart={handleDragStart}
+              onTouchMove={handleDragMove}
+              onTouchEnd={handleDragEnd}
+            >
               <div className="mx-auto h-1.5 w-12 rounded-full bg-white/10" />
             </div>
 
@@ -358,7 +444,7 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
               <button onClick={(e) => {
                 e.stopPropagation()
                 closeComments()
-              }} className="p-1 rounded-full hover:bg-white/10">
+              }} aria-label="Zamknij komentarze" className="p-2 -mr-1 rounded-full hover:bg-white/10 press-feedback">
                 <X className="h-5 w-5 text-white/70" />
               </button>
             </div>
@@ -366,20 +452,33 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
             {/* Comments list */}
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
               {loadingComments ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-white/80" />
+                <div className="space-y-4 py-2">
+                  <CommentSkeleton />
+                  <CommentSkeleton />
+                  <CommentSkeleton />
                 </div>
               ) : comments.length === 0 ? (
                 <p className="text-center text-sm text-white/50 py-8">Brak komentarzy. Badz pierwszy!</p>
               ) : (
-                comments.map((comment) => (
-                  <CommentItem
-                    key={comment.id}
-                    comment={comment}
-                    onReplyRequest={setReplyTarget}
-                    onLikeChange={handleCommentLikeChange}
-                  />
-                ))
+                <>
+                  {comments.slice(0, visibleCount).map((comment) => (
+                    <CommentItem
+                      key={comment.id}
+                      comment={comment}
+                      onReplyRequest={setReplyTarget}
+                      onLikeChange={handleCommentLikeChange}
+                    />
+                  ))}
+                  {comments.length > visibleCount && (
+                    <button
+                      type="button"
+                      onClick={() => setVisibleCount(prev => prev + 20)}
+                      className="w-full py-3 text-center text-sm font-medium text-primary hover:text-primary-light transition-colors press-feedback"
+                    >
+                      Pokaż więcej ({comments.length - visibleCount})
+                    </button>
+                  )}
+                </>
               )}
             </div>
 

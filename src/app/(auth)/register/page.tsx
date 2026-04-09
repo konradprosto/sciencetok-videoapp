@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import { Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('')
@@ -13,6 +13,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -58,7 +59,7 @@ export default function RegisterPage() {
               onChange={(e) => setUsername(e.target.value)}
               placeholder="jan_kowalski"
               required
-              className="w-full rounded-xl border border-white/8 bg-[#0a0a0c] px-3 py-2 text-sm text-[#EDEDEF] placeholder:text-[#8A8F98] focus:border-[#5E6AD2] focus:outline-none focus:ring-1 focus:ring-[#5E6AD2] transition-colors"
+              className="w-full rounded-xl border border-white/8 bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
             />
           </div>
           <div className="space-y-2">
@@ -70,25 +71,36 @@ export default function RegisterPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="jan@example.com"
               required
-              className="w-full rounded-xl border border-white/8 bg-[#0a0a0c] px-3 py-2 text-sm text-[#EDEDEF] placeholder:text-[#8A8F98] focus:border-[#5E6AD2] focus:outline-none focus:ring-1 focus:ring-[#5E6AD2] transition-colors"
+              className="w-full rounded-xl border border-white/8 bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
             />
           </div>
           <div className="space-y-2">
             <label htmlFor="password" className="text-sm font-medium">Hasło</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="w-full rounded-xl border border-white/8 bg-[#0a0a0c] px-3 py-2 text-sm text-[#EDEDEF] placeholder:text-[#8A8F98] focus:border-[#5E6AD2] focus:outline-none focus:ring-1 focus:ring-[#5E6AD2] transition-colors"
-            />
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="w-full rounded-xl border border-white/8 bg-card px-3 py-2 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Ukryj hasło' : 'Pokaż hasło'}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            <p className="text-xs text-muted-foreground">Minimum 6 znaków</p>
           </div>
           {error && (
             <p className="text-destructive text-sm">{error}</p>
           )}
-          <Button type="submit" className="w-full bg-[#5E6AD2] hover:bg-[#4F5BC0] text-white transition-colors" disabled={loading}>
+          <Button type="submit" className="w-full bg-primary hover:bg-primary-hover text-white transition-colors" disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Zarejestruj się
           </Button>

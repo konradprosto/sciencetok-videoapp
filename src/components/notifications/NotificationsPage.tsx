@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Bell, Heart, MessageCircle, CheckCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { NotificationSkeleton } from '@/components/ui/skeleton'
 import { createClient } from '@/lib/supabase/client'
 import { emitNotificationsChanged, NOTIFICATIONS_CHANGED_EVENT } from '@/lib/notifications'
 import type { Notification } from '@/types/notification'
@@ -101,7 +102,7 @@ export function NotificationsPage() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Powiadomienia</h1>
-          <p className="mt-1 text-sm text-[#8A8F98]">
+          <p className="mt-1 text-sm text-muted-foreground">
             Odpowiedzi na komentarze i serduszka pod Twoimi wypowiedziami.
           </p>
         </div>
@@ -119,15 +120,17 @@ export function NotificationsPage() {
       </div>
 
       {loading ? (
-        <div className="mt-8 rounded-2xl border border-white/8 bg-[#0a0a0c] p-8 text-center text-sm text-[#8A8F98]">
-          Ładowanie powiadomień...
+        <div className="mt-8 space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <NotificationSkeleton key={i} />
+          ))}
         </div>
       ) : notifications.length === 0 ? (
-        <div className="mt-8 rounded-2xl border border-white/8 bg-[#0a0a0c] p-8 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#5E6AD2]/10">
-            <Bell className="h-6 w-6 text-[#5E6AD2]" />
+        <div className="mt-8 rounded-2xl border border-white/8 bg-card p-8 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+            <Bell className="h-6 w-6 text-primary" />
           </div>
-          <p className="mt-4 text-sm text-[#8A8F98]">Na razie nie masz żadnych powiadomień.</p>
+          <p className="mt-4 text-sm text-muted-foreground">Na razie nie masz żadnych powiadomień.</p>
         </div>
       ) : (
         <div className="mt-8 space-y-3">
@@ -137,12 +140,12 @@ export function NotificationsPage() {
               href={`/video/${notification.video_id}`}
               className={`block rounded-2xl border p-4 transition-colors ${
                 notification.read_at
-                  ? 'border-white/6 bg-[#0a0a0c]'
-                  : 'border-[#5E6AD2]/30 bg-[#5E6AD2]/8'
+                  ? 'border-white/6 bg-card'
+                  : 'border-primary/30 bg-primary/8'
               }`}
             >
               <div className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/6 text-[#5E6AD2]">
+                <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/6 text-primary">
                   {notification.type === 'comment_like' ? (
                     <Heart className="h-4 w-4" />
                   ) : (
@@ -154,15 +157,15 @@ export function NotificationsPage() {
                     <p className="text-sm font-medium text-white">
                       {notificationCopy(notification)}
                     </p>
-                    <span className="shrink-0 text-xs text-[#8A8F98]">{timeAgo(notification.created_at)}</span>
+                    <span className="shrink-0 text-xs text-muted-foreground">{timeAgo(notification.created_at)}</span>
                   </div>
                   {notification.comments?.content && (
-                    <p className="mt-2 line-clamp-2 text-sm text-[#8A8F98]">
+                    <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
                       &quot;{notification.comments.content}&quot;
                     </p>
                   )}
                   {notification.videos?.title && (
-                    <p className="mt-2 text-xs uppercase tracking-[0.18em] text-[#8A8F98]">
+                    <p className="mt-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
                       Film: {notification.videos.title}
                     </p>
                   )}

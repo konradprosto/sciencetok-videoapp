@@ -33,7 +33,7 @@ export function VideoCard({ video }: VideoCardProps) {
   return (
     <Link href={`/video/${video.id}`} className="group block">
       {/* Thumbnail */}
-      <div className="relative aspect-video overflow-hidden rounded-xl bg-[#0a0a0c] border border-white/5 group-hover:border-white/10 transition-all duration-300">
+      <div className="relative aspect-video overflow-hidden rounded-xl bg-card border border-white/5 group-hover:border-white/10 transition-all duration-300">
         {video.thumbnail_url ? (
           <Image
             src={video.thumbnail_url}
@@ -60,17 +60,17 @@ export function VideoCard({ video }: VideoCardProps) {
 
       {/* Info */}
       <div className="mt-3 flex gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#5E6AD2]/15 text-xs font-semibold text-[#5E6AD2]">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
           {video.profiles?.display_name?.[0]?.toUpperCase() || video.profiles?.username?.[0]?.toUpperCase() || '?'}
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-medium leading-tight line-clamp-2 group-hover:text-white transition-colors">
             {video.title}
           </h3>
-          <p className="mt-1 text-xs text-[#8A8F98]">
+          <p className="mt-1 text-xs text-muted-foreground">
             {video.profiles?.display_name || video.profiles?.username}
           </p>
-          <div className="mt-0.5 flex items-center gap-3 text-xs text-[#8A8F98]">
+          <div className="mt-0.5 flex items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <Eye className="h-3 w-3" />
               {formatCount(video.view_count)}

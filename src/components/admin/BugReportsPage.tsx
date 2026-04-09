@@ -13,7 +13,7 @@ const STATUS_META: Record<BugReportStatus, { label: string; tone: string; icon: 
   },
   in_review: {
     label: 'W trakcie',
-    tone: 'border-[#5E6AD2]/20 bg-[#5E6AD2]/10 text-[#C7CCFF]',
+    tone: 'border-primary/20 bg-primary/10 text-primary-light',
     icon: Clock3,
   },
   closed: {
@@ -85,26 +85,26 @@ export function BugReportsPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Zgłoszenia błędów</h1>
-          <p className="mt-2 text-sm text-[#8A8F98]">
+          <p className="mt-2 text-sm text-muted-foreground">
             Minimalny inbox do łapania bugów od użytkowników, razem ze screenshotami i kontekstem strony.
           </p>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-right">
-          <p className="text-xs uppercase tracking-[0.2em] text-[#8A8F98]">Otwarte</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Otwarte</p>
           <p className="mt-1 text-2xl font-semibold text-white">{openCount}</p>
         </div>
       </div>
 
       {loading ? (
-        <div className="mt-8 flex items-center justify-center rounded-3xl border border-white/10 bg-[#0a0a0c] px-6 py-12 text-[#8A8F98]">
+        <div className="mt-8 flex items-center justify-center rounded-3xl border border-white/10 bg-card px-6 py-12 text-muted-foreground">
           <Loader2 className="h-5 w-5 animate-spin" />
         </div>
       ) : reports.length === 0 ? (
-        <div className="mt-8 rounded-3xl border border-white/10 bg-[#0a0a0c] p-10 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#5E6AD2]/10 text-[#C7CCFF]">
+        <div className="mt-8 rounded-3xl border border-white/10 bg-card p-10 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary-light">
             <Bug className="h-6 w-6" />
           </div>
-          <p className="mt-4 text-sm text-[#8A8F98]">Na razie nie ma żadnych zgłoszeń.</p>
+          <p className="mt-4 text-sm text-muted-foreground">Na razie nie ma żadnych zgłoszeń.</p>
         </div>
       ) : (
         <div className="mt-8 space-y-4">
@@ -113,7 +113,7 @@ export function BugReportsPage() {
             const StatusIcon = meta.icon
 
             return (
-              <article key={report.id} className="rounded-3xl border border-white/10 bg-[#0a0a0c] p-5 shadow-[0_16px_40px_rgba(0,0,0,0.18)]">
+              <article key={report.id} className="rounded-3xl border border-white/10 bg-card p-5 shadow-[0_16px_40px_rgba(0,0,0,0.18)]">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-3">
@@ -121,11 +121,11 @@ export function BugReportsPage() {
                         <StatusIcon className="h-3.5 w-3.5" />
                         {meta.label}
                       </span>
-                      <span className="text-xs text-[#8A8F98]">{timeAgo(report.created_at)}</span>
+                      <span className="text-xs text-muted-foreground">{timeAgo(report.created_at)}</span>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-white">{report.reporter_username || report.reporter_email}</p>
-                      <p className="text-xs text-[#8A8F98]">{report.reporter_email}</p>
+                      <p className="text-xs text-muted-foreground">{report.reporter_email}</p>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -153,7 +153,7 @@ export function BugReportsPage() {
                       type="button"
                       size="sm"
                       disabled={updatingId === report.id || report.status === 'closed'}
-                      className="bg-[#5E6AD2] text-white hover:bg-[#4F5BC0]"
+                      className="bg-primary text-white hover:bg-primary-hover"
                       onClick={() => updateStatus(report.id, 'closed')}
                     >
                       Zamknij
@@ -168,12 +168,12 @@ export function BugReportsPage() {
                 <div className="mt-4 grid gap-4 md:grid-cols-[minmax(0,1fr)_240px]">
                   <div className="space-y-3 rounded-2xl border border-white/8 bg-white/[0.03] p-4 text-sm">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.2em] text-[#8A8F98]">Strona</p>
+                      <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Strona</p>
                       <p className="mt-1 text-[#D7DAE1]">{report.page_path || 'brak danych'}</p>
                     </div>
                     {report.user_agent && (
                       <div>
-                        <p className="text-xs uppercase tracking-[0.2em] text-[#8A8F98]">Przeglądarka</p>
+                        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Przeglądarka</p>
                         <p className="mt-1 break-words text-[#D7DAE1]">{report.user_agent}</p>
                       </div>
                     )}
@@ -189,13 +189,13 @@ export function BugReportsPage() {
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={report.screenshot_url} alt="Załączony screenshot zgłoszenia" className="h-40 w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
-                        <div className="flex items-center justify-between px-3 py-2 text-xs text-[#C8CDD5]">
+                        <div className="flex items-center justify-between px-3 py-2 text-xs text-subtle">
                           <span>Otwórz screenshot</span>
                           <ExternalLink className="h-3.5 w-3.5" />
                         </div>
                       </a>
                     ) : (
-                      <div className="flex h-full min-h-40 items-center justify-center rounded-2xl border border-dashed border-white/8 px-4 text-center text-sm text-[#8A8F98]">
+                      <div className="flex h-full min-h-40 items-center justify-center rounded-2xl border border-dashed border-white/8 px-4 text-center text-sm text-muted-foreground">
                         Brak załączonego screena
                       </div>
                     )}

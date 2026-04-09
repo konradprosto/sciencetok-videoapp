@@ -43,7 +43,7 @@ export function VideoActions({ videoId, initialLikeCount, initialHasLiked, comme
         className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm transition-all duration-200 ${
           liked
             ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
-            : 'bg-white/5 text-[#8A8F98] hover:bg-white/10 hover:text-white'
+            : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white'
         }`}
       >
         <Heart className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} />
@@ -52,7 +52,7 @@ export function VideoActions({ videoId, initialLikeCount, initialHasLiked, comme
 
       <a
         href="#comments"
-        className="flex items-center gap-1.5 rounded-xl bg-white/5 px-3 py-2 text-sm text-[#8A8F98] hover:bg-white/10 hover:text-white transition-colors"
+        className="flex items-center gap-1.5 rounded-xl bg-white/5 px-3 py-2 text-sm text-muted-foreground hover:bg-white/10 hover:text-white transition-colors"
       >
         <MessageCircle className="h-4 w-4" />
         <span>{commentCount}</span>
@@ -60,7 +60,7 @@ export function VideoActions({ videoId, initialLikeCount, initialHasLiked, comme
 
       <button
         onClick={handleShare}
-        className="flex items-center gap-1.5 rounded-xl bg-white/5 px-3 py-2 text-sm text-[#8A8F98] hover:bg-white/10 hover:text-white transition-colors"
+        className="flex items-center gap-1.5 rounded-xl bg-white/5 px-3 py-2 text-sm text-muted-foreground hover:bg-white/10 hover:text-white transition-colors"
       >
         <Share2 className="h-4 w-4" />
       </button>

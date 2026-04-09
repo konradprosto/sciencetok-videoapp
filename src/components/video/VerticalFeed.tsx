@@ -52,9 +52,9 @@ export function VerticalFeed({ initialVideos }: VerticalFeedProps) {
 
   if (videos.length === 0) {
     return (
-      <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#050506] z-50">
-        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-[#5E6AD2]/10 mb-6">
-          <svg className="h-12 w-12 text-[#5E6AD2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-background z-feed">
+        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/10 mb-6">
+          <svg className="h-12 w-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
           </svg>
         </div>
@@ -65,7 +65,7 @@ export function VerticalFeed({ initialVideos }: VerticalFeedProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-center bg-black">
+    <div className="fixed inset-0 z-feed flex justify-center bg-black">
       <div
         ref={scrollRef}
         className="h-full w-full md:max-w-[480px] snap-y snap-mandatory overflow-y-auto"

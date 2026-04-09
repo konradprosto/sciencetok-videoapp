@@ -16,7 +16,7 @@ function formatCount(n: number) {
 export function ProfileVideoTile({ video }: ProfileVideoTileProps) {
   return (
     <Link href={`/video/${video.id}`} className="group block">
-      <div className="relative aspect-[9/16] overflow-hidden rounded-xl bg-[#0a0a0c]">
+      <div className="relative aspect-[9/16] overflow-hidden rounded-xl bg-card">
         {video.thumbnail_url ? (
           <Image
             src={video.thumbnail_url}

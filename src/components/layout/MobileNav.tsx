@@ -23,17 +23,19 @@ export function MobileNav() {
   ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/8 bg-[#050506] md:hidden">
-      <div className="flex items-center justify-around py-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-header border-t border-white/8 bg-background md:hidden" aria-label="Nawigacja mobilna">
+      <div className="flex items-center justify-around py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         {items.map((item) => (
           <Link
             key={item.href}
             href={item.href}
+            aria-label={item.label}
+            aria-current={pathname === item.href ? 'page' : undefined}
             className={cn(
-              'flex flex-col items-center gap-1 px-3 py-1 text-xs transition-colors',
+              'flex flex-col items-center gap-1 px-3 py-1.5 text-xs transition-colors press-feedback',
               pathname === item.href
-                ? 'text-[#5E6AD2]'
-                : 'text-[#8A8F98] hover:text-[#EDEDEF]'
+                ? 'text-primary'
+                : 'text-muted-foreground hover:text-foreground'
             )}
           >
             <item.icon className="h-5 w-5" />

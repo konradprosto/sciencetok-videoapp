@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { VideoCard } from '@/components/video/VideoCard'
 import { Search as SearchIcon, Loader2, X } from 'lucide-react'
 import type { Video } from '@/types/video'
+import { useScrollRestoration } from '@/hooks/useScrollRestoration'
 
 export default function SearchPage() {
   const searchParams = useSearchParams()
@@ -13,6 +14,8 @@ export default function SearchPage() {
   const [results, setResults] = useState<Video[]>([])
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
+
+  useScrollRestoration()
 
   const search = useCallback(async (q: string) => {
     if (!q.trim()) {
@@ -58,19 +61,19 @@ export default function SearchPage() {
 
         {/* Search input */}
         <form onSubmit={handleSubmit} className="relative mb-8">
-          <SearchIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#8A8F98]" />
+          <SearchIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Szukaj filmów..."
-            className="w-full rounded-2xl border border-white/8 bg-[#0a0a0c] pl-12 pr-12 py-3.5 text-sm placeholder:text-[#8A8F98]/50 focus:border-[#5E6AD2] focus:outline-none focus:ring-1 focus:ring-[#5E6AD2] transition-colors"
+            className="w-full rounded-2xl border border-white/8 bg-card pl-12 pr-12 py-3.5 text-sm placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
           />
           {query && (
             <button
               type="button"
               onClick={() => { setQuery(''); setResults([]); setSearched(false) }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8A8F98] hover:text-white transition-colors"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white transition-colors"
             >
               <X className="h-4 w-4" />
             </button>
@@ -80,12 +83,12 @@ export default function SearchPage() {
         {/* Results */}
         {loading ? (
           <div className="flex justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-[#8A8F98]" />
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : searched && results.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="text-lg font-medium">Brak wyników</p>
-            <p className="mt-1 text-sm text-[#8A8F98]">
+            <p className="mt-1 text-sm text-muted-foreground">
               Nie znaleziono filmów dla &quot;{searchParams.get('q')}&quot;
             </p>
           </div>
@@ -97,10 +100,10 @@ export default function SearchPage() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#5E6AD2]/10 mb-4">
-              <SearchIcon className="h-7 w-7 text-[#5E6AD2]" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-4">
+              <SearchIcon className="h-7 w-7 text-primary" />
             </div>
-            <p className="text-sm text-[#8A8F98]">
+            <p className="text-sm text-muted-foreground">
               Wpisz frazę, aby wyszukać filmy
             </p>
           </div>

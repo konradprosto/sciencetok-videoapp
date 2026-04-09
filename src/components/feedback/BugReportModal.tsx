@@ -104,27 +104,27 @@ export function BugReportModal({ open, onClose }: BugReportModalProps) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[110] flex items-end justify-center bg-black/70 p-4 backdrop-blur-sm md:items-center"
+      className="fixed inset-0 z-modal flex items-end justify-center bg-black/70 p-4 backdrop-blur-sm md:items-center"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg rounded-3xl border border-white/10 bg-[#0a0a0c] p-6 shadow-2xl shadow-black/40"
+        className="w-full max-w-lg rounded-3xl border border-white/10 bg-card p-6 shadow-2xl shadow-black/40"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#5E6AD2]">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
               ScienceTok
             </p>
             <h2 className="mt-2 text-xl font-bold text-white">Zgłoś błąd</h2>
-            <p className="mt-2 text-sm leading-6 text-[#8A8F98]">
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
               Opisz, co nie działa. Jeśli chcesz, dodaj screenshot, a zgłoszenie trafi od razu do admina.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-2 text-[#8A8F98] transition-colors hover:bg-white/5 hover:text-white"
+            className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-white/5 hover:text-white"
             aria-label="Zamknij zgłoszenie błędu"
           >
             <X className="h-4 w-4" />
@@ -139,14 +139,14 @@ export function BugReportModal({ open, onClose }: BugReportModalProps) {
               </div>
               <div>
                 <p className="font-medium text-white">Zgłoszenie wysłane</p>
-                <p className="mt-1 text-sm text-[#C8CDD5]">
+                <p className="mt-1 text-sm text-subtle">
                   Dzięki. Admin zobaczy to w panelu zgłoszeń razem z adresem strony i screenshotem.
                 </p>
               </div>
             </div>
             <Button
               type="button"
-              className="mt-4 w-full bg-[#5E6AD2] text-white hover:bg-[#4F5BC0]"
+              className="mt-4 w-full bg-primary text-white hover:bg-primary-hover"
               onClick={onClose}
             >
               Zamknij
@@ -164,23 +164,30 @@ export function BugReportModal({ open, onClose }: BugReportModalProps) {
                 onChange={(event) => setMessage(event.target.value)}
                 placeholder="Np. po kliknięciu komentarzy aplikacja się rozjeżdża albo przycisk nic nie robi."
                 rows={5}
-                className="w-full rounded-2xl border border-white/10 bg-[#050506] px-4 py-3 text-base text-white placeholder:text-[#8A8F98]/60 focus:border-[#5E6AD2] focus:outline-none focus:ring-1 focus:ring-[#5E6AD2] md:text-sm"
+                className="w-full rounded-2xl border border-white/10 bg-background px-4 py-3 text-base text-white placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary md:text-sm"
               />
-              <p className="text-xs text-[#8A8F98]">
-                Aktualna strona: <span className="text-[#C8CDD5]">{pathname}</span>
-              </p>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <p>
+                  Aktualna strona: <span className="text-subtle">{pathname}</span>
+                </p>
+                {message.trim().length > 0 && message.trim().length < 10 && (
+                  <p className="text-amber-400">
+                    Jeszcze {10 - message.trim().length} znaków
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-white">Screenshot <span className="text-[#8A8F98]">(opcjonalnie)</span></label>
-              <label className="flex cursor-pointer flex-col gap-3 rounded-2xl border border-dashed border-white/10 bg-[#050506] p-4 transition-colors hover:border-white/20 hover:bg-white/[0.03]">
+              <label className="text-sm font-medium text-white">Screenshot <span className="text-muted-foreground">(opcjonalnie)</span></label>
+              <label className="flex cursor-pointer flex-col gap-3 rounded-2xl border border-dashed border-white/10 bg-background p-4 transition-colors hover:border-white/20 hover:bg-white/[0.03]">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-2xl bg-[#5E6AD2]/10 p-3 text-[#C7CCFF]">
+                  <div className="rounded-2xl bg-primary/10 p-3 text-primary-light">
                     <ImagePlus className="h-5 w-5" />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-white">Dodaj zrzut ekranu</p>
-                    <p className="text-xs text-[#8A8F98]">PNG, JPG lub WebP do {MAX_SCREENSHOT_SIZE_MB} MB</p>
+                    <p className="text-xs text-muted-foreground">PNG, JPG lub WebP do {MAX_SCREENSHOT_SIZE_MB} MB</p>
                   </div>
                 </div>
                 <input
@@ -193,11 +200,11 @@ export function BugReportModal({ open, onClose }: BugReportModalProps) {
                   <div className="overflow-hidden rounded-2xl border border-white/10">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={screenshotPreviewUrl} alt="Podgląd screena" className="h-40 w-full object-cover" />
-                    <div className="flex items-center justify-between bg-black/30 px-3 py-2 text-xs text-[#C8CDD5]">
+                    <div className="flex items-center justify-between bg-black/30 px-3 py-2 text-xs text-subtle">
                       <span className="truncate">{screenshot.name}</span>
                       <button
                         type="button"
-                        className="rounded-full px-2 py-1 text-[#8A8F98] transition-colors hover:bg-white/5 hover:text-white"
+                        className="rounded-full px-2 py-1 text-muted-foreground transition-colors hover:bg-white/5 hover:text-white"
                         onClick={(event) => {
                           event.preventDefault()
                           setScreenshot(null)
@@ -229,7 +236,7 @@ export function BugReportModal({ open, onClose }: BugReportModalProps) {
               </Button>
               <Button
                 type="submit"
-                className="w-full bg-[#5E6AD2] text-white hover:bg-[#4F5BC0]"
+                className="w-full bg-primary text-white hover:bg-primary-hover"
                 disabled={submitting || message.trim().length < 10}
               >
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}

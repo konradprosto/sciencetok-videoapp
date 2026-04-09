@@ -49,7 +49,9 @@ export function UserMenu() {
       <div className="relative" ref={menuRef}>
         <button
           onClick={() => setOpen(!open)}
-          className="flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm hover:bg-muted transition-colors"
+          aria-label="Menu użytkownika"
+          aria-expanded={open}
+          className="flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm hover:bg-muted transition-colors press-feedback"
         >
           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">
             {user.email?.[0]?.toUpperCase() ?? 'U'}
@@ -57,7 +59,7 @@ export function UserMenu() {
           <ChevronDown className="h-3 w-3" />
         </button>
         {open && (
-          <div className="absolute right-0 z-50 mt-2 w-56 rounded-md border bg-popover p-1 shadow-md">
+          <div className="absolute right-0 z-dropdown mt-2 w-56 rounded-md border bg-popover p-1 shadow-md">
             <Link
               href={`/profile/${user.user_metadata?.username ?? user.id}`}
               onClick={() => setOpen(false)}

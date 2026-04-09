@@ -46,7 +46,7 @@ export function CommentItem({ comment, onReplyRequest, onLikeChange }: CommentIt
 
   return (
     <div className="flex gap-3">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/5 text-xs font-medium text-[#8A8F98]">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/5 text-xs font-medium text-muted-foreground">
         {comment.profiles?.display_name?.[0]?.toUpperCase() || comment.profiles?.username?.[0]?.toUpperCase() || '?'}
       </div>
       <div className="flex-1 min-w-0">
@@ -54,28 +54,30 @@ export function CommentItem({ comment, onReplyRequest, onLikeChange }: CommentIt
           <span className="text-sm font-medium">
             {comment.profiles?.display_name || comment.profiles?.username}
           </span>
-          <span className="text-xs text-[#8A8F98]">{timeAgo}</span>
+          <span className="text-xs text-muted-foreground">{timeAgo}</span>
         </div>
-        <p className="mt-1 text-sm text-[#EDEDEF]/80 whitespace-pre-wrap break-words">
+        <p className="mt-1 text-sm text-foreground/80 whitespace-pre-wrap break-words">
           {comment.content}
         </p>
-        <div className="mt-2 flex items-center gap-4">
+        <div className="mt-2 flex items-center gap-2">
           <button
             type="button"
             onClick={handleLike}
-            className={`flex items-center gap-1 text-xs transition-colors ${
-              comment.user_has_liked ? 'text-rose-400' : 'text-[#8A8F98] hover:text-rose-400'
+            aria-label={comment.user_has_liked ? 'Cofnij polubienie komentarza' : 'Polub komentarz'}
+            className={`flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs transition-colors press-feedback ${
+              comment.user_has_liked ? 'text-rose-400' : 'text-muted-foreground hover:text-rose-400'
             }`}
           >
-            <Heart className={`h-3.5 w-3.5 ${comment.user_has_liked ? 'fill-current' : ''}`} />
+            <Heart className={`h-4 w-4 ${comment.user_has_liked ? 'fill-current' : ''}`} />
             <span>{comment.like_count || 0}</span>
           </button>
           <button
             type="button"
             onClick={() => onReplyRequest?.(comment)}
-            className="flex items-center gap-1 text-xs text-[#8A8F98] hover:text-[#5E6AD2] transition-colors"
+            aria-label={`Odpowiedz na komentarz użytkownika ${comment.profiles?.username}`}
+            className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs text-muted-foreground hover:text-primary transition-colors press-feedback"
           >
-            <MessageCircle className="h-3 w-3" />
+            <MessageCircle className="h-4 w-4" />
             Odpowiedz
           </button>
         </div>

@@ -21,25 +21,25 @@ export function LoginPromptModal({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 p-4 backdrop-blur-sm md:items-center"
+      className="fixed inset-0 z-modal-backdrop flex items-end justify-center bg-black/70 p-4 backdrop-blur-sm md:items-center"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0a0a0c] p-6 shadow-2xl shadow-black/40"
+        className="w-full max-w-md rounded-2xl border border-white/10 bg-card p-6 shadow-2xl shadow-black/40"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#5E6AD2]">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
               ScienceTok
             </p>
             <h2 className="mt-2 text-xl font-bold text-white">{title}</h2>
-            <p className="mt-2 text-sm leading-6 text-[#8A8F98]">{description}</p>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-2 text-[#8A8F98] transition-colors hover:bg-white/5 hover:text-white"
+            className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-white/5 hover:text-white"
             aria-label="Zamknij modal logowania"
           >
             <X className="h-4 w-4" />
@@ -48,7 +48,7 @@ export function LoginPromptModal({
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Link href="/login" className="flex-1" onClick={onClose}>
-            <Button className="w-full bg-[#5E6AD2] text-white hover:bg-[#4F5BC0]">
+            <Button className="w-full bg-primary text-white hover:bg-primary-hover">
               <LogIn className="h-4 w-4" />
               Zaloguj się
             </Button>
