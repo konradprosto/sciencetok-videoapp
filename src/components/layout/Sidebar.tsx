@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Compass, Upload, User, Bell } from 'lucide-react'
+import { Home, Compass, Upload, User, Bell, Bug } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/components/auth/AuthProvider'
 
@@ -14,6 +14,7 @@ export function Sidebar() {
     { href: '/search', label: 'Szukaj', icon: Compass },
     { href: '/notifications', label: 'Powiadomienia', icon: Bell },
     ...(isAdmin ? [{ href: '/upload', label: 'Dodaj', icon: Upload }] : []),
+    ...(isAdmin ? [{ href: '/admin/bug-reports', label: 'Zgłoszenia', icon: Bug }] : []),
   ]
 
   return (
