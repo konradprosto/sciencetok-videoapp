@@ -329,75 +329,73 @@ export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMute
         </div>
       </div>
 
-      <button
-        type="button"
-        aria-label="Zamknij komentarze"
-        onClick={(e) => {
-          e.stopPropagation()
-          closeComments()
-        }}
-        className={cn(
-          'absolute inset-0 z-30 bg-black/0 transition-colors duration-300',
-          showComments ? 'pointer-events-auto bg-black/35' : 'pointer-events-none'
-        )}
-      />
-
-      {/* Comments panel - anchored bottom sheet with video preserved above */}
-      <div
-        className={cn(
-          'absolute inset-x-0 bottom-0 z-40 flex h-[54dvh] min-h-[24rem] max-h-[54dvh] flex-col rounded-t-[28px] border-t border-white/10 bg-[#0a0a0c]/96 backdrop-blur-xl transition-transform duration-300 ease-out sm:h-[56dvh] sm:max-h-[56dvh]',
-          showComments ? 'translate-y-0' : 'translate-y-full pointer-events-none'
-        )}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="shrink-0 px-4 pt-2">
-          <div className="mx-auto h-1.5 w-12 rounded-full bg-white/10" />
-        </div>
-
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
-          <h3 className="text-white font-semibold text-sm">
-            Komentarze ({commentCount})
-          </h3>
-          <button onClick={(e) => {
-            e.stopPropagation()
-            closeComments()
-          }} className="p-1 rounded-full hover:bg-white/10">
-            <X className="h-5 w-5 text-white/70" />
-          </button>
-        </div>
-
-        {/* Comments list */}
-        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
-          {loadingComments ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-white/80" />
-            </div>
-          ) : comments.length === 0 ? (
-            <p className="text-center text-sm text-white/50 py-8">Brak komentarzy. Badz pierwszy!</p>
-          ) : (
-            comments.map((comment) => (
-              <CommentItem
-                key={comment.id}
-                comment={comment}
-                onReplyRequest={setReplyTarget}
-                onLikeChange={handleCommentLikeChange}
-              />
-            ))
-          )}
-        </div>
-
-        {/* Comment form */}
-        <div className="shrink-0 border-t border-white/10 px-4 py-3 pb-[env(safe-area-inset-bottom,12px)]">
-          <CommentForm
-            videoId={video.id}
-            parentId={replyTarget?.id}
-            replyLabel={replyTarget?.profiles?.username || replyTarget?.profiles?.display_name || null}
-            onClearReply={() => setReplyTarget(null)}
-            onSubmit={replyTarget ? handleReply : handleCommentSubmit}
+      {showComments && (
+        <>
+          <button
+            type="button"
+            aria-label="Zamknij komentarze"
+            onClick={(e) => {
+              e.stopPropagation()
+              closeComments()
+            }}
+            className="absolute inset-0 z-30 bg-black/35 transition-colors duration-300"
           />
-        </div>
-      </div>
+
+          {/* Comments panel - anchored bottom sheet with video preserved above */}
+          <div
+            className="absolute inset-x-0 bottom-0 z-40 flex h-[54dvh] min-h-[24rem] max-h-[54dvh] flex-col rounded-t-[28px] border-t border-white/10 bg-[#0a0a0c]/96 backdrop-blur-xl animate-slide-up sm:h-[56dvh] sm:max-h-[56dvh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="shrink-0 px-4 pt-2">
+              <div className="mx-auto h-1.5 w-12 rounded-full bg-white/10" />
+            </div>
+
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
+              <h3 className="text-white font-semibold text-sm">
+                Komentarze ({commentCount})
+              </h3>
+              <button onClick={(e) => {
+                e.stopPropagation()
+                closeComments()
+              }} className="p-1 rounded-full hover:bg-white/10">
+                <X className="h-5 w-5 text-white/70" />
+              </button>
+            </div>
+
+            {/* Comments list */}
+            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
+              {loadingComments ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-white/80" />
+                </div>
+              ) : comments.length === 0 ? (
+                <p className="text-center text-sm text-white/50 py-8">Brak komentarzy. Badz pierwszy!</p>
+              ) : (
+                comments.map((comment) => (
+                  <CommentItem
+                    key={comment.id}
+                    comment={comment}
+                    onReplyRequest={setReplyTarget}
+                    onLikeChange={handleCommentLikeChange}
+                  />
+                ))
+              )}
+            </div>
+
+            {/* Comment form */}
+            <div className="shrink-0 border-t border-white/10 px-4 py-3 pb-[env(safe-area-inset-bottom,12px)]">
+              <CommentForm
+                videoId={video.id}
+                parentId={replyTarget?.id}
+                replyLabel={replyTarget?.profiles?.username || replyTarget?.profiles?.display_name || null}
+                onClearReply={() => setReplyTarget(null)}
+                onSubmit={replyTarget ? handleReply : handleCommentSubmit}
+              />
+            </div>
+          </div>
+        </>
+      )}
 
       <LoginPromptModal
         open={showLoginPrompt}
