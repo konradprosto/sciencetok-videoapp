@@ -2,20 +2,18 @@
 
 import { useMemo, useState } from 'react'
 import type { Comment } from '@/types/comment'
-import { CommentForm } from './CommentForm'
 import { Heart, MessageCircle } from 'lucide-react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { LoginPromptModal } from '@/components/auth/LoginPromptModal'
 
 interface CommentItemProps {
   comment: Comment
-  onReply?: (comment: Comment) => void
+  onReplyRequest?: (comment: Comment) => void
   onLikeChange?: (commentId: string, liked: boolean, likeCount: number) => void
 }
 
-export function CommentItem({ comment, onReply, onLikeChange }: CommentItemProps) {
+export function CommentItem({ comment, onReplyRequest, onLikeChange }: CommentItemProps) {
   const { user } = useAuth()
-  const [showReply, setShowReply] = useState(false)
   const [now] = useState(() => Date.now())
   const [showLoginPrompt, setShowLoginPrompt] = useState(false)
 
@@ -73,34 +71,21 @@ export function CommentItem({ comment, onReply, onLikeChange }: CommentItemProps
             <span>{comment.like_count || 0}</span>
           </button>
           <button
-            onClick={() => setShowReply(!showReply)}
+            type="button"
+            onClick={() => onReplyRequest?.(comment)}
             className="flex items-center gap-1 text-xs text-[#8A8F98] hover:text-[#5E6AD2] transition-colors"
           >
             <MessageCircle className="h-3 w-3" />
             Odpowiedz
           </button>
         </div>
-        {showReply && (
-          <div className="mt-3">
-            <CommentForm
-              videoId={comment.video_id}
-              parentId={comment.id}
-              autoFocus
-              onCancel={() => setShowReply(false)}
-              onSubmit={(newComment) => {
-                setShowReply(false)
-                onReply?.(newComment)
-              }}
-            />
-          </div>
-        )}
         {comment.replies && comment.replies.length > 0 && (
           <div className="mt-4 space-y-4 border-l border-white/8 pl-4">
             {comment.replies.map((reply) => (
               <CommentItem
                 key={reply.id}
                 comment={reply}
-                onReply={onReply}
+                onReplyRequest={onReplyRequest}
                 onLikeChange={onLikeChange}
               />
             ))}

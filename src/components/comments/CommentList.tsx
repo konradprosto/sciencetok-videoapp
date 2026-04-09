@@ -68,10 +68,6 @@ export function CommentList({ videoId, initialComments, onCountChange }: Comment
     }
   }, [videoId])
 
-  const handleReply = (reply: Comment) => {
-    setComments((prev) => insertCommentIntoTree(prev, reply))
-  }
-
   const handleLikeChange = (commentId: string, liked: boolean, likeCount: number) => {
     setComments((prev) => updateCommentInTree(prev, commentId, (comment) => ({
       ...comment,
@@ -94,7 +90,6 @@ export function CommentList({ videoId, initialComments, onCountChange }: Comment
         <CommentItem
           key={comment.id}
           comment={comment}
-          onReply={handleReply}
           onLikeChange={handleLikeChange}
         />
       ))}
