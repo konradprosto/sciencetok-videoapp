@@ -36,6 +36,7 @@ yarn-error.log*
 # vercel
 .vercel
 supabase/.temp
+ios/App/App/public
 
 # typescript
 *.tsbuildinfo

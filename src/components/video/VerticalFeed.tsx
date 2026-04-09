@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import type { Video } from '@/types/video'
 import { VerticalVideoSlide } from './VerticalVideoSlide'
+import { useAuth } from '@/components/auth/AuthProvider'
+import { useUnreadNotifications } from '@/hooks/useUnreadNotifications'
 
 interface VerticalFeedProps {
   initialVideos: Video[]
@@ -12,6 +14,8 @@ export function VerticalFeed({ initialVideos }: VerticalFeedProps) {
   const [videos, setVideos] = useState<Video[]>(initialVideos)
   const [activeIndex, setActiveIndex] = useState(0)
   const [globalMuted, setGlobalMuted] = useState(false)
+  const { user } = useAuth()
+  const unreadNotifications = useUnreadNotifications(user?.id)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   // Load more videos
@@ -78,6 +82,7 @@ export function VerticalFeed({ initialVideos }: VerticalFeedProps) {
             isActive={index === activeIndex}
             globalMuted={globalMuted}
             onMutedChange={setGlobalMuted}
+            unreadNotifications={unreadNotifications}
           />
         ))}
       </div>

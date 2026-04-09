@@ -11,7 +11,6 @@ import { CommentForm } from '@/components/comments/CommentForm'
 import { CommentItem } from '@/components/comments/CommentItem'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { LoginPromptModal } from '@/components/auth/LoginPromptModal'
-import { useUnreadNotifications } from '@/hooks/useUnreadNotifications'
 import { countComments, insertCommentIntoTree, updateCommentInTree } from '@/lib/comments'
 import { cn } from '@/lib/utils'
 import { CommentSkeleton } from '@/components/ui/skeleton'
@@ -22,12 +21,12 @@ interface VerticalVideoSlideProps {
   isActive: boolean
   globalMuted: boolean
   onMutedChange: (muted: boolean) => void
+  unreadNotifications?: number
 }
 
-export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMutedChange }: VerticalVideoSlideProps) {
+export function VerticalVideoSlide({ video, index, isActive, globalMuted, onMutedChange, unreadNotifications = 0 }: VerticalVideoSlideProps) {
   const playerRef = useRef<MuxPlayerElement | null>(null)
   const { user, isAdmin } = useAuth()
-  const unreadNotifications = useUnreadNotifications(user?.id)
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(video.like_count || 0)
   const [paused, setPaused] = useState(false)
