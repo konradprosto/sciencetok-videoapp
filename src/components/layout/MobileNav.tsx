@@ -13,11 +13,12 @@ export function MobileNav() {
   const unreadCount = useUnreadNotifications(user?.id)
 
   const items = [
-    { href: '/', label: 'Główna', icon: Home },
-    { href: '/search', label: 'Szukaj', icon: Search },
-    { href: user ? '/notifications' : '/login', label: 'Powiad.', icon: Bell },
-    ...(isAdmin ? [{ href: '/upload', label: 'Dodaj', icon: Upload }] : []),
+    { key: 'home', href: '/', label: 'Główna', icon: Home },
+    { key: 'search', href: '/search', label: 'Szukaj', icon: Search },
+    { key: 'notifications', href: user ? '/notifications' : '/login', label: 'Powiad.', icon: Bell },
+    ...(isAdmin ? [{ key: 'upload', href: '/upload', label: 'Dodaj', icon: Upload }] : []),
     {
+      key: 'profile',
       href: user ? `/profile/${user.user_metadata?.username ?? user.id}` : '/login',
       label: 'Profil',
       icon: User,
@@ -29,7 +30,7 @@ export function MobileNav() {
       <div className="flex items-center justify-around py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         {items.map((item) => (
           <Link
-            key={item.href}
+            key={item.key}
             href={item.href}
             aria-label={item.label}
             aria-current={pathname === item.href ? 'page' : undefined}
